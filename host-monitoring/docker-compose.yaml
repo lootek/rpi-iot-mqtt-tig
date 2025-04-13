@@ -44,7 +44,7 @@ services:
     command: 
       - '-storage_driver=influxdb'
       - '-storage_driver_db=cadvisor'
-      - '-storage_driver_host=192.168.10.22:8086'
+      - '-storage_driver_host=192.168.10.18:8086'
       # - '-housekeeping_interval=15s'
       # - '-docker_only=true'
       # - '-store_container_labels=false'
