@@ -6,26 +6,7 @@ import re
 
 logging.basicConfig(level=logging.INFO)
 
-influx_client_iot = InfluxDBClient("192.168.10.22", 8086, database="iot")
-influx_client_mqtt = InfluxDBClient("192.168.10.22", 8086, database="mqtt")
-
-
-def save_msg_legacy(msg):
-    if msg.payload == "nan":
-        logging.info("Skipping invalid measurement")
-        pass
-
-    current_time = datetime.datetime.utcnow().isoformat()
-    json_body = [
-        {
-            "measurement": msg.topic,
-            "tags": {},
-            "time": current_time,
-            "fields": {"value": msg.payload},
-        }
-    ]
-    logging.info(json_body)
-    influx_client_iot.write_points(json_body)
+influx_client_mqtt = InfluxDBClient("192.168.10.18", 8086, database="mqtt")
 
 
 def extract_sensor_data(path):
@@ -67,6 +48,9 @@ def save_msg(msg):
         measurement = sensor
         sensor = "system"
 
+    if location == "arbor":
+        location = "backyard-shed"
+
     json_body = [
         {
             "measurement": sensor,
@@ -91,7 +75,6 @@ def save_msg(msg):
 
 
 def save_msg_wrapper(msg):
-    save_msg_legacy(msg)
     save_msg(msg)
 
 

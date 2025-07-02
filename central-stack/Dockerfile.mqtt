@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /code
 
 COPY requirements.txt .
+ENV MSGPACK_PUREPYTHON=1
 RUN pip install --user -r requirements.txt
 
 COPY mqtt-listener.py .

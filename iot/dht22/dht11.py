@@ -41,8 +41,8 @@ def measure():
     while True:
         humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, 4)
         print("Temp: {0:0.1f} C  Humidity: {1:0.1f} %".format(temperature, humidity))
-        publish(client, "/sensors/attic/dht11/temperature", temperature)
-        publish(client, "/sensors/attic/dht11/humidity", humidity)
+        publish(client, "/sensors/living_room/dht11/temperature", temperature)
+        publish(client, "/sensors/living_room/dht11/humidity", humidity)
 
         sleep(60)
 
