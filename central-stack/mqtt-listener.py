@@ -49,7 +49,7 @@ def save_msg(msg):
         sensor = "system"
 
     if location == "arbor":
-        location = "backyard-shed"
+        location = "backyard_shed"
 
     json_body = [
         {
