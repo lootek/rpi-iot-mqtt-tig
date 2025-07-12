@@ -14,10 +14,12 @@ from paho.mqtt import client as mqtt_client
 debug = False
 
 # ADS1263
-samples_num = 500
+samples_num = 1000
+adc_rate = "ADS1263_7200SPS"
 ref_voltage = 2.5
 inputs_count = 10
 time_elapsed = 0
+ampers_volt_ratio = 30.0
 
 # MQTT
 port = 1883
@@ -54,14 +56,19 @@ def publish(client, topic, msg):
 def get_measurement(ads):
     channelList = [i for i in range(inputs_count)]
     raw_data = ads.ADS1263_GetAll(channelList)
+
     for i in channelList:
-        raw_data[i] = round(raw_data[i] * ref_voltage / 0x7FFFFFFF, 6)
-        # raw_data[i] = round(raw_data[i] * ref_voltage / 0x7FFFFF, 6)
+        if raw_data[i] >> 31 == 1:
+            raw_data[i] = round(
+                (2 - raw_data[i]) * ref_voltage * ampers_volt_ratio / 0x80000000, 6
+            )
+        else:
+            raw_data[i] = round(
+                raw_data[i] * ref_voltage * ampers_volt_ratio / 0x7FFFFFFF, 6
+            )
 
-    #     print("ADC1 IN%d = %lf" % (i, raw_data[i]))
-
-    # for i in channelList:
-    #     print("\33[2A")
+    if debug:
+        print(raw_data)
 
     return raw_data
 
@@ -71,31 +78,36 @@ def measure(ads):
         if debug:
             print("Starting measurement")
 
-        # start timer for kWh calculations
         start_time = time()
 
-        squares_sum = [0.0 for i in range(inputs_count)]
-        IrmsA = [0.0 for i in range(inputs_count)]
-        kW = float(0)
+        all_samples_for_channels = [[] for _ in range(inputs_count)]
 
         count = 0
         while count < samples_num:
             count += 1
-
             raw_data = get_measurement(ads)
             for i in range(inputs_count):
-                squares_sum[i] += raw_data[i] ** 2
+                all_samples_for_channels[i].append(raw_data[i])
 
-        # Calibrated for SCT-013 30A/1V
+        Irms = [0.0 for _ in range(inputs_count)]
+
         for i in range(inputs_count):
-            IrmsA[i] = round((squares_sum[i] / samples_num) ** 0.5, 6)
+            samples = all_samples_for_channels[i]
+            if len(samples) > 0:
+                dc_offset = sum(samples) / len(samples)
+
+                for raw in samples:
+                    Irms[i] += (raw - dc_offset) ** 2
+
+                Irms[i] = (Irms[i] / len(samples)) ** 0.5
+            else:
+                Irms[i] = 0.0
 
         time_elapsed = time() - start_time
-
         if debug:
             print(time_elapsed)
 
-        print("IrmsA:\t", IrmsA)
+        print("Irms:\t", Irms)
 
         # # Calculate total AMPS from all sensors and convert to kW
         # kW = 0.0
@@ -103,13 +115,13 @@ def measure(ads):
         # # convert kW to kW / hour (kWh)
         # kWh = round((kW * time_elapsed) / 3600, 8)
 
-        # iso = datetime.now(datetime.timezone.utc).isoformat() + "Z"
+        # iso_fmt = datetime.now(datetime.timezone.utc).isoformat() + "Z"
 
         # json_data = [
         #     {
         #         "measurement": "current",
         #         "tags": {},
-        #         "time": iso,
+        #         "time": iso_fmt,
         #         "fields": {
         #             "voltage": LINEV,
         #             "kWh": kWh,
@@ -145,24 +157,26 @@ def setup_ads1263():
     print("Initializing ADS1263")
     ads = ADS1263.ADS1263()
 
-    spi_status = config.module_init()
-    print("Module init: ", spi_status)
+    ads.ADS1263_init_ADC1(adc_rate)
 
-    ads.ADS1263_reset()
-    chip_id = ads.ADS1263_ReadChipID()
-    print("Chip ID: ", chip_id)
+    # spi_status = config.module_init()
+    # print("Module init: ", spi_status)
 
-    ads.ADS1263_WriteCmd(ADS1263.ADS1263_CMD["CMD_STOP1"])
-    ads.ADS1263_SetMode(0)
+    # ads.ADS1263_reset()
+    # chip_id = ads.ADS1263_ReadChipID()
+    # print("Chip ID: ", chip_id)
 
-    MODE = 0x00  # 0x80:PGA bypassed, 0x00:PGA enabled
-    gain = ADS1263.ADS1263_GAIN["ADS1263_GAIN_1"]
-    drate = ADS1263.ADS1263_DRATE["ADS1263_38400SPS"]
-    MODE |= (gain << 4) | drate
-    ads.ADS1263_WriteReg(ADS1263.ADS1263_REG["REG_MODE2"], MODE)
+    # ads.ADS1263_WriteCmd(ADS1263.ADS1263_CMD["CMD_STOP1"])
+    # ads.ADS1263_SetMode(0)
 
-    ads.ADS1263_WriteReg(ADS1263.ADS1263_REG["REG_REFMUX"], 0x00)
-    ads.ADS1263_WriteCmd(ADS1263.ADS1263_CMD["CMD_START1"])
+    # MODE = 0x00  # 0x80:PGA bypassed, 0x00:PGA enabled
+    # gain = ADS1263.ADS1263_GAIN["ADS1263_GAIN_1"]
+    # drate = ADS1263.ADS1263_DRATE[adc_rate]
+    # MODE |= (gain << 4) | drate
+    # ads.ADS1263_WriteReg(ADS1263.ADS1263_REG["REG_MODE2"], MODE)
+
+    # ads.ADS1263_WriteReg(ADS1263.ADS1263_REG["REG_REFMUX"], 0x00)
+    # ads.ADS1263_WriteCmd(ADS1263.ADS1263_CMD["CMD_START1"])
 
     return ads
 
