@@ -11,6 +11,6 @@ requests==2.31.0
 RPi.GPIO==0.7.1
 setuptools==68.2.2
 six==1.16.0
-urllib3==2.1.0
+urllib3==2.6.0
 wheel==0.41.2
 spidev==3.5
