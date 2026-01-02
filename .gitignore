@@ -7,6 +7,7 @@ grafana.db
 *.log
 volumes/influxdb/
 volumes/grafana/db/
+volumes/grafana/conf/grafana.ini.bak
 volumes/lost+found/
 volumes/influxdb.ancient/
 volumes/volumes.old/
