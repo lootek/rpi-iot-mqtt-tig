@@ -37,7 +37,8 @@ def connect_mqtt():
             raise RuntimeError("Failed to connect to MQTT, return code {}\n".format(rc))
 
     def on_disconnect(client, userdata, rc):
-        client.connect(broker, port, keepalive=60)
+        if rc != 0:
+            print("Unexpected disconnection.")
 
     client = mqtt_client.Client(client_id)
     client.on_connect = on_connect
@@ -151,6 +152,9 @@ if __name__ == "__main__":
                     except Exception as error:
                         print("Exception: ", error)
                         break
+
+                client.loop_stop()
+                client.disconnect()
 
             except Exception as error:
                 print("Exception: ", error)
