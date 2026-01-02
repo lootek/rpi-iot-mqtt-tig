@@ -28,7 +28,7 @@ services:
       - ../env/telegraf
     # networks:
     #   - influxdb
-    #privileged: true
+    privileged: true
     user: telegraf:995
     volumes:
       - ../volumes/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro

@@ -13,10 +13,13 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:2.0.18
+    #image: rinopauletto/mosquitto-logrotate:2.0.19
     container_name: mosquitto
     restart: unless-stopped
     ports:
      - "9001:9001"
      - "1883:1883"
     volumes:
-     - ../volumes/mosquitto:/mosquitto/config
+     - ../volumes/mosquitto/config:/mosquitto/config
+     - ../volumes/mosquitto/data:/mosquitto/data
+     - ../volumes/mosquitto/log:/mosquitto/log
