@@ -20,6 +20,8 @@ ref_voltage = 2.5
 inputs_count = 10
 time_elapsed = 0
 ampers_volt_ratio = 30.0
+voltage = 230.0
+power_factor = 0.9
 
 # MQTT
 port = 1883
@@ -53,97 +55,47 @@ def publish(client, topic, msg):
         raise RuntimeError("Failed to send message to topic {}".format(topic))
 
 
-def get_measurement(ads):
-    channelList = [i for i in range(inputs_count)]
-    raw_data = ads.ADS1263_GetAll(channelList)
-
-    for i in channelList:
-        if raw_data[i] >> 31 == 1:
-            raw_data[i] = round(
-                (2 - raw_data[i]) * ref_voltage * ampers_volt_ratio / 0x80000000, 6
-            )
-        else:
-            raw_data[i] = round(
-                raw_data[i] * ref_voltage * ampers_volt_ratio / 0x7FFFFFFF, 6
-            )
-
-    if debug:
-        print(raw_data)
-
-    return raw_data
-
-
-def measure(ads):
+def measure(client, ads):
     while True:
         if debug:
             print("Starting measurement")
 
-        start_time = time()
-
-        all_samples_for_channels = [[] for _ in range(inputs_count)]
-
-        count = 0
-        while count < samples_num:
-            count += 1
-            raw_data = get_measurement(ads)
-            for i in range(inputs_count):
-                all_samples_for_channels[i].append(raw_data[i])
-
-        Irms = [0.0 for _ in range(inputs_count)]
-
         for i in range(inputs_count):
-            samples = all_samples_for_channels[i]
+            start_time = time()
+            ads.ADS1263_SetChannal(i)
+            samples = []
+
+            for _ in range(samples_num):
+                ads.ADS1263_WaitDRDY()
+                raw = ads.ADS1263_Read_ADC_Data()
+
+                # Correct 32-bit signed integer conversion
+                if raw >> 31 == 1:
+                    val = raw - 0x100000000
+                else:
+                    val = raw
+
+                # Convert to Amps
+                amps = (val / 0x7FFFFFFF) * ref_voltage * ampers_volt_ratio
+                samples.append(amps)
+
+            time_elapsed = time() - start_time
+
             if len(samples) > 0:
                 dc_offset = sum(samples) / len(samples)
-
-                for raw in samples:
-                    Irms[i] += (raw - dc_offset) ** 2
-
-                Irms[i] = (Irms[i] / len(samples)) ** 0.5
+                irms = (
+                    sum((x - dc_offset) ** 2 for x in samples) / len(samples)
+                ) ** 0.5
             else:
-                Irms[i] = 0.0
+                irms = 0.0
 
-        time_elapsed = time() - start_time
-        if debug:
-            print(time_elapsed)
+            power = (irms * voltage * power_factor) / 1000.0
+            energy = (power * time_elapsed) / 3600.0
 
-        print("Irms:\t", Irms)
-
-        # # Calculate total AMPS from all sensors and convert to kW
-        # kW = 0.0
-
-        # # convert kW to kW / hour (kWh)
-        # kWh = round((kW * time_elapsed) / 3600, 8)
-
-        # iso_fmt = datetime.now(datetime.timezone.utc).isoformat() + "Z"
-
-        # json_data = [
-        #     {
-        #         "measurement": "current",
-        #         "tags": {},
-        #         "time": iso_fmt,
-        #         "fields": {
-        #             "voltage": LINEV,
-        #             "kWh": kWh,
-        #             "kW_0": kW[0],
-        #             "A_0": amps[0],
-        #         },
-        #     }
-        # ]
-
-        # client = InfluxDBClient(
-        #     "192.168.10.18", 8086, "", "", "ampread", timeout=60, retries=0
-        # )
-        # try:
-        #     client.write_points(json_data)
-        # except ConnectionError:
-        #     print("influxdb server not responding")
-        #     continue
-
-        # humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
-        # print("Temp: {0:0.1f} C  Humidity: {1:0.1f} %".format(temperature, humidity))
-        # publish(client, "/sensors/living_room/dht22/temperature", temperature)
-        # publish(client, "/sensors/living_room/dht22/humidity", humidity)
+            print("Ch{}: Irms: {:.2f} A, Power: {:.3f} kW".format(i, irms, power))
+            publish(client, "/sensors/sct013/{}/current".format(i), irms)
+            publish(client, "/sensors/sct013/{}/power".format(i), power)
+            publish(client, "/sensors/sct013/{}/energy".format(i), energy)
 
         delay = 1
 
@@ -188,13 +140,13 @@ if __name__ == "__main__":
         print("Running measurements loop")
         while True:
             try:
-                # client = connect_mqtt()
-                # client.loop_start()
+                client = connect_mqtt()
+                client.loop_start()
 
                 while True:
                     try:
-                        measure(ads)
-                    except IOError as e:
+                        measure(client, ads)
+                    except IOError as error:
                         print("Exception: ", error)
                     except Exception as error:
                         print("Exception: ", error)
