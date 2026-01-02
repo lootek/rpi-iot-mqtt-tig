@@ -10,8 +10,8 @@ port = 1883
 broker = "192.168.10.18"
 client_id = "lothlorien-python-dht22"
 
-#broker = "mosquitto"
-#client_id = "ithilien-python-dht22"
+# broker = "mosquitto"
+# client_id = "ithilien-python-dht22"
 
 
 def connect_mqtt():
@@ -22,7 +22,8 @@ def connect_mqtt():
             print("Failed to connect, return code {}\n".format(rc))
 
     def on_disconnect(client, userdata, rc):
-        client.connect(broker, port, keepalive=60)
+        if rc != 0:
+            print("Unexpected disconnection.")
 
     client = mqtt_client.Client(client_id)
     client.on_connect = on_connect
@@ -40,7 +41,7 @@ def publish(client, topic, msg):
         raise RuntimeError("Failed to send message to topic {}".format(topic))
 
 
-def measure():
+def measure(client):
     while True:
         humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, 4)
         print("Temp: {0:0.1f} C  Humidity: {1:0.1f} %".format(temperature, humidity))
@@ -57,10 +58,13 @@ if __name__ == "__main__":
 
         while True:
             try:
-                measure()
+                measure(client)
             except Exception as error:
                 print("Exception: ", error)
                 break
+
+        client.loop_stop()
+        client.disconnect()
 
         print("Retrying in 5 min")
         sleep(300)
