@@ -22,7 +22,7 @@ services:
   telegraf:
     image: telegraf:1.33
     container_name: telegraf
-    hostname: lothlorien
+    hostname: ${HOSTNAME:-unknown_hostname}
     restart: unless-stopped
     env_file:
       - ../env/telegraf
@@ -38,7 +38,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor-arm64:v0.49.2
     container_name: cadvisor
-    hostname: lothlorien
+    hostname: ${HOSTNAME:-unknown_hostname}
     # links:
     #   - influxdb:influxsrv
     command: 
