@@ -14,8 +14,11 @@ RUN git clone https://github.com/adafruit/Adafruit_Python_DHT.git && \
   sed -i 's/return None/return 3/g' Adafruit_DHT/platform_detect.py && \
   python setup.py install
 
+#RUN git clone https://github.com/adafruit/Adafruit_Python_DHT.git && \
+#  cd Adafruit_Python_DHT/ && \
 #  git checkout 8f5e2c4d6ebba8836f6d31ec9a0c171948e3237d && \
 #  patch -ubR --verbose Adafruit_DHT/platform_detect.py ../adafruit.patch && \
+#  python setup.py install
 
 WORKDIR /code
 
