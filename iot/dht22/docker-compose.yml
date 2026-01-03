@@ -7,3 +7,4 @@ services:
     container_name: iot-dht22
     restart: unless-stopped
     privileged: true
+    hostname: ${HOSTNAME:-unknown_hostname}

@@ -9,3 +9,4 @@ services:
     container_name: iot-sct013
     restart: unless-stopped
     privileged: true
+    hostname: ${HOSTNAME:-unknown_hostname}

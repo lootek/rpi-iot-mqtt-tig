@@ -3,6 +3,7 @@
 
 import sys
 import time
+import socket
 from time import sleep, time
 from datetime import datetime
 from influxdb import InfluxDBClient
@@ -26,7 +27,8 @@ power_factor = 0.9
 # MQTT
 port = 1883
 broker = "192.168.10.18"
-client_id = "rohan-python-sct013"
+hostname = socket.gethostname()
+client_id = f"{hostname}-python-sct013"
 
 
 def connect_mqtt():
