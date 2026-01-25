@@ -1,12 +1,24 @@
 import datetime
 import logging
+import os
 import re
+
 import paho.mqtt.client as mqtt
+import requests
 from influxdb import InfluxDBClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 influx_client_mqtt = InfluxDBClient("192.168.10.18", 8086, database="mqtt")
+
+AQICN_MEASUREMENT_MAP = {
+    "sps30.mc_2p5": "pm25",
+    "sps30.mc_10p0": "pm10",
+}
+AQICN_TOKEN = os.getenv("AQICN_TOKEN")
+AQICN_STATION = os.getenv("AQICN_STATION")
+AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/data-platform/upload")
+AQICN_TIMEOUT = float(os.getenv("AQICN_TIMEOUT", "5"))
 
 
 def extract_sensor_data(path):
@@ -32,6 +44,37 @@ def extract_sensor_data(path):
         return match.group(1), match.group(2), match.group(3)
 
     return None
+
+
+def push_to_aqicn(measurement_key, value, timestamp_iso):
+    if not AQICN_TOKEN or not AQICN_STATION:
+        logging.warning(
+            "AQICN_TOKEN or AQICN_STATION not set; skipping push to AQICN"
+        )
+        return
+
+    api_measurement = AQICN_MEASUREMENT_MAP.get(measurement_key)
+    if not api_measurement:
+        return
+
+    payload = {
+        "token": AQICN_TOKEN,
+        "station": AQICN_STATION,
+        api_measurement: value,
+        "time": timestamp_iso,
+    }
+
+    try:
+        response = requests.post(AQICN_API_URL, json=payload, timeout=AQICN_TIMEOUT)
+        response.raise_for_status()
+    except requests.RequestException as error:
+        logging.error(
+            "Failed to push to AQICN: %s (measurement=%s value=%s station=%s)",
+            error,
+            measurement_key,
+            value,
+            AQICN_STATION,
+        )
 
 
 def save_msg(msg):
@@ -66,6 +109,11 @@ def save_msg(msg):
     if location == "arbor":
         location = "backyard_shed"
 
+    measurement_key = f"{sensor}.{measurement}"
+    if measurement_key in AQICN_MEASUREMENT_MAP and isinstance(value, (int, float)):
+        logging.info("Pushing %s=%s to AQICN", measurement_key, value)
+        push_to_aqicn(measurement_key, value, current_time)
+
     json_body = [
         {
             "measurement": sensor,
@@ -78,9 +126,9 @@ def save_msg(msg):
             },
         }
     ]
-    logging.info(json_body)
 
     try:
+        logging.info("Writing points to InfluxDB: %s", json_body)
         influx_client_mqtt.write_points(json_body)
     except Exception as error:
         logging.error(
