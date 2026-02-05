@@ -48,9 +48,7 @@ def extract_sensor_data(path):
 
 def push_to_aqicn(measurement_key, value, timestamp_iso):
     if not AQICN_TOKEN or not AQICN_STATION:
-        logging.warning(
-            "AQICN_TOKEN or AQICN_STATION not set; skipping push to AQICN"
-        )
+        logging.warning("AQICN_TOKEN or AQICN_STATION not set; skipping push to AQICN")
         return
 
     api_measurement = AQICN_MEASUREMENT_MAP.get(measurement_key)
@@ -109,10 +107,11 @@ def save_msg(msg):
     if location == "arbor":
         location = "backyard_shed"
 
-    measurement_key = f"{sensor}.{measurement}"
-    if measurement_key in AQICN_MEASUREMENT_MAP and isinstance(value, (int, float)):
-        logging.info("Pushing %s=%s to AQICN", measurement_key, value)
-        push_to_aqicn(measurement_key, value, current_time)
+    if location == "patio":
+        measurement_key = f"{sensor}.{measurement}"
+        if measurement_key in AQICN_MEASUREMENT_MAP and isinstance(value, (int, float)):
+            logging.info("Pushing %s=%s to AQICN", measurement_key, value)
+            push_to_aqicn(measurement_key, value, current_time)
 
     json_body = [
         {
