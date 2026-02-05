@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import re
+import time
 
 import paho.mqtt.client as mqtt
 import requests
@@ -14,11 +15,15 @@ influx_client_mqtt = InfluxDBClient("192.168.10.18", 8086, database="mqtt")
 AQICN_MEASUREMENT_MAP = {
     "sps30.mc_2p5": "pm25",
     "sps30.mc_10p0": "pm10",
+    "sps30.temperature": "t",
+    "sps30.humidity": "h",
 }
 AQICN_TOKEN = os.getenv("AQICN_TOKEN")
 AQICN_STATION = os.getenv("AQICN_STATION")
 AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/data-platform/upload")
 AQICN_TIMEOUT = float(os.getenv("AQICN_TIMEOUT", "5"))
+AQICN_UPLOAD_INTERVAL = float(os.getenv("UPLOAD_INTERVAL", "300"))
+AQICN_LAST_UPLOAD = 0
 
 
 def extract_sensor_data(path):
@@ -51,6 +56,13 @@ def push_to_aqicn(measurement_key, value, timestamp_iso):
         logging.warning("AQICN_TOKEN or AQICN_STATION not set; skipping push to AQICN")
         return
 
+    global AQICN_LAST_UPLOAD
+    now = time.time()
+
+    # Don't flood the API
+    if now - AQICN_LAST_UPLOAD < AQICN_UPLOAD_INTERVAL:
+        return
+
     api_measurement = AQICN_MEASUREMENT_MAP.get(measurement_key)
     if not api_measurement:
         return
@@ -65,6 +77,8 @@ def push_to_aqicn(measurement_key, value, timestamp_iso):
     try:
         response = requests.post(AQICN_API_URL, json=payload, timeout=AQICN_TIMEOUT)
         response.raise_for_status()
+        print(f"AQICN: Data uploaded successfully for {AQICN_STATION}")
+        AQICN_LAST_UPLOAD = now
     except requests.RequestException as error:
         logging.error(
             "Failed to push to AQICN: %s (measurement=%s value=%s station=%s)",
@@ -83,7 +97,7 @@ def save_msg(msg):
         else str(payload_raw)
     )
     if payload_text.lower() == "nan":
-        logging.info("Skipping invalid measurement")
+        logging.info("Skipping invalid measurement %s at %s", payload_text, msg.topic)
         return
 
     current_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -92,7 +106,7 @@ def save_msg(msg):
     try:
         value = float(payload_text)
     except ValueError:
-        logging.info("Couldn't convert %s to float", payload_text)
+        logging.info("Couldn't convert %s to float at %s", payload_text, msg.topic)
 
     sensor_data = extract_sensor_data(msg.topic)
     if not sensor_data:
