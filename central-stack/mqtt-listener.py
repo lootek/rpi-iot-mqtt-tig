@@ -96,7 +96,7 @@ def push_to_aqicn(measurement_key, value):
             logging.info("Not enough time has passed since last upload, skipping")
             return
 
-        logging.info("Pushing to AQICN: %s", payload)
+        logging.info("Pushing to AQICN: %s", readings)
         response = requests.post(AQICN_API_URL, json=payload, timeout=AQICN_TIMEOUT)
         response.raise_for_status()
         print(f"AQICN: Data uploaded successfully for {AQICN_STATION_ID}")
@@ -105,13 +105,7 @@ def push_to_aqicn(measurement_key, value):
             "last_upload": now,
         }
     except requests.RequestException as error:
-        logging.error(
-            "Failed to push to AQICN: %s (measurement=%s value=%s station=%s)",
-            error,
-            measurement_key,
-            value,
-            AQICN_STATION_ID,
-        )
+        logging.error("Failed to push to AQICN: %s", error)
 
 
 def save_msg(msg):
