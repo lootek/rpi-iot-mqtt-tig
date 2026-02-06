@@ -12,18 +12,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 influx_client_mqtt = InfluxDBClient("192.168.10.18", 8086, database="mqtt")
 
-AQICN_MEASUREMENT_MAP = {
+AQICN_MEASUREMENTS_KEYS_MAP = {
     "sps30.mc_2p5": "pm25",
     "sps30.mc_10p0": "pm10",
-    "sps30.temperature": "t",
-    "sps30.humidity": "h",
+    "dht22.temperature": "temp",
+    "dht22.humidity": "humidity",
 }
+AQICN_LAST_MEASUREMENT = {}
 AQICN_TOKEN = os.getenv("AQICN_TOKEN")
-AQICN_STATION = os.getenv("AQICN_STATION")
-AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/data-platform/upload")
+AQICN_STATION_ID = os.getenv("AQICN_STATION_ID")
+AQICN_STATION_NAME = os.getenv("AQICN_STATION_NAME")
+AQICN_STATION_LATITUDE = os.getenv("AQICN_STATION_LATITUDE")
+AQICN_STATION_LONGITUDE = os.getenv("AQICN_STATION_LONGITUDE")
+AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/sensor/upload")
 AQICN_TIMEOUT = float(os.getenv("AQICN_TIMEOUT", "5"))
-AQICN_UPLOAD_INTERVAL = float(os.getenv("UPLOAD_INTERVAL", "300"))
-AQICN_LAST_UPLOAD = 0
+AQICN_MIN_UPLOAD_INTERVAL = float(os.getenv("AQICN_MIN_UPLOAD_INTERVAL", "150"))
 
 
 def extract_sensor_data(path):
@@ -52,40 +55,61 @@ def extract_sensor_data(path):
 
 
 def push_to_aqicn(measurement_key, value, timestamp_iso):
-    if not AQICN_TOKEN or not AQICN_STATION:
-        logging.warning("AQICN_TOKEN or AQICN_STATION not set; skipping push to AQICN")
+    if not AQICN_TOKEN or not AQICN_STATION_ID:
+        logging.warning(
+            "AQICN_TOKEN or AQICN_STATION_ID not set; skipping push to AQICN"
+        )
         return
 
-    global AQICN_LAST_UPLOAD
+    global AQICN_LAST_MEASUREMENT
     now = time.time()
 
-    # Don't flood the API
-    if now - AQICN_LAST_UPLOAD < AQICN_UPLOAD_INTERVAL:
+    if not measurement_key in AQICN_MEASUREMENTS_KEYS_MAP:
         return
 
-    api_measurement = AQICN_MEASUREMENT_MAP.get(measurement_key)
-    if not api_measurement:
-        return
+    AQICN_LAST_MEASUREMENT[AQICN_MEASUREMENTS_KEYS_MAP[measurement_key]] = value
+
+    readings = []
+    for _, aqicn_key in AQICN_MEASUREMENTS_KEYS_MAP.items():
+        if not aqicn_key in AQICN_LAST_MEASUREMENT:
+            logging.info("Not enough data to push to AQICN, skipping for now...")
+            return
+
+        readings.append(
+            {"specie": aqicn_key, "value": AQICN_LAST_MEASUREMENT[aqicn_key]}
+        )
 
     payload = {
         "token": AQICN_TOKEN,
-        "station": AQICN_STATION,
-        api_measurement: value,
-        "time": timestamp_iso,
+        "station": {
+            "id": AQICN_STATION_ID,
+            "name": AQICN_STATION_NAME,
+            "latitude": AQICN_STATION_LATITUDE,
+            "longitude": AQICN_STATION_LONGITUDE,
+        },
+        "readings": readings,
     }
 
     try:
+        last_upload = AQICN_LAST_MEASUREMENT.get("last_upload", 0)
+        if now - last_upload < AQICN_MIN_UPLOAD_INTERVAL:
+            logging.info("Not enough time has passed since last upload, skipping")
+            return
+
         response = requests.post(AQICN_API_URL, json=payload, timeout=AQICN_TIMEOUT)
         response.raise_for_status()
-        print(f"AQICN: Data uploaded successfully for {AQICN_STATION}")
-        AQICN_LAST_UPLOAD = now
+        print(f"AQICN: Data uploaded successfully for {AQICN_STATION_ID}")
+
+        AQICN_LAST_MEASUREMENT = {
+            "last_upload": now,
+        }
     except requests.RequestException as error:
         logging.error(
             "Failed to push to AQICN: %s (measurement=%s value=%s station=%s)",
             error,
             measurement_key,
             value,
-            AQICN_STATION,
+            AQICN_STATION_ID,
         )
 
 
@@ -123,7 +147,9 @@ def save_msg(msg):
 
     if location == "patio":
         measurement_key = f"{sensor}.{measurement}"
-        if measurement_key in AQICN_MEASUREMENT_MAP and isinstance(value, (int, float)):
+        if measurement_key in AQICN_MEASUREMENTS_KEYS_MAP and isinstance(
+            value, (int, float)
+        ):
             logging.info("Pushing %s=%s to AQICN", measurement_key, value)
             push_to_aqicn(measurement_key, value, current_time)
 
