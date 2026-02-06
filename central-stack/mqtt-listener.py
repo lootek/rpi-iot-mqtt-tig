@@ -26,7 +26,7 @@ AQICN_STATION_LATITUDE = os.getenv("AQICN_STATION_LATITUDE")
 AQICN_STATION_LONGITUDE = os.getenv("AQICN_STATION_LONGITUDE")
 AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/sensor/upload")
 AQICN_TIMEOUT = float(os.getenv("AQICN_TIMEOUT", "5"))
-AQICN_MIN_UPLOAD_INTERVAL = float(os.getenv("AQICN_MIN_UPLOAD_INTERVAL", "150"))
+AQICN_MIN_UPLOAD_INTERVAL = float(os.getenv("AQICN_MIN_UPLOAD_INTERVAL", "300"))
 
 
 def extract_sensor_data(path):
