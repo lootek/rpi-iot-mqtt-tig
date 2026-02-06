@@ -54,7 +54,7 @@ def extract_sensor_data(path):
     return None
 
 
-def push_to_aqicn(measurement_key, value, timestamp_iso):
+def push_to_aqicn(measurement_key, value):
     if not AQICN_TOKEN or not AQICN_STATION_ID:
         logging.warning(
             "AQICN_TOKEN or AQICN_STATION_ID not set; skipping push to AQICN"
@@ -96,6 +96,7 @@ def push_to_aqicn(measurement_key, value, timestamp_iso):
             logging.info("Not enough time has passed since last upload, skipping")
             return
 
+        logging.info("Pushing to AQICN: %s", payload)
         response = requests.post(AQICN_API_URL, json=payload, timeout=AQICN_TIMEOUT)
         response.raise_for_status()
         print(f"AQICN: Data uploaded successfully for {AQICN_STATION_ID}")
@@ -150,8 +151,7 @@ def save_msg(msg):
         if measurement_key in AQICN_MEASUREMENTS_KEYS_MAP and isinstance(
             value, (int, float)
         ):
-            logging.info("Pushing %s=%s to AQICN", measurement_key, value)
-            push_to_aqicn(measurement_key, value, current_time)
+            push_to_aqicn(measurement_key, value)
 
     json_body = [
         {

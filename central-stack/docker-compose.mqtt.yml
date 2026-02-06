@@ -3,6 +3,8 @@ version: '3'
 services:
   mqtt-to-influxdb:
     image: mqtt-to-influxdb:latest
+    env_file:
+      - .mqtt.env
     build:
       dockerfile: Dockerfile.mqtt
       context: .
