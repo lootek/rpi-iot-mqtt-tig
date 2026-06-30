@@ -37,19 +37,25 @@ def extract_sensor_data(path):
 
     match = re.match(r"/sensors/([^/]+)/(lastwill)", normalized)
     if match:
-        return match.group(1), match.group(2), None
+        return match.group(1), match.group(2), None, None
 
     match = re.match(r"/sensors/([^/]+)/(status)", normalized)
     if match:
-        return match.group(1), match.group(2), None
+        return match.group(1), match.group(2), None, None
 
+    # /sensors/<location>/wifi/<bssid>/<field>  — per-network diagnostics
+    match = re.match(r"/sensors/([^/]+)/wifi/([^/]+)/([^/]+)", normalized)
+    if match:
+        return match.group(1), "wifi", match.group(3), match.group(2)
+
+    # legacy flat /sensors/<location>/wifi/ip  (no BSSID segment)
     match = re.match(r"/sensors/([^/]+)/(wifi)/(ip)", normalized)
     if match:
-        return match.group(1), match.group(2), match.group(3)
+        return match.group(1), match.group(2), match.group(3), None
 
     match = re.match(r"/sensors/([^/]+)/([^/]+)/([^/]+)", normalized)
     if match:
-        return match.group(1), match.group(2), match.group(3)
+        return match.group(1), match.group(2), match.group(3), None
 
     return None
 
@@ -132,7 +138,7 @@ def save_msg(msg):
         logging.warning("Failed to parse topic %s; dropping message", msg.topic)
         return
 
-    location, sensor, measurement = sensor_data
+    location, sensor, measurement, bssid = sensor_data
     if not measurement:
         measurement = sensor
         sensor = "system"
@@ -147,13 +153,15 @@ def save_msg(msg):
         ):
             push_to_aqicn(measurement_key, value)
 
+    tags = {"location": location}
+    if bssid:
+        tags["bssid"] = bssid
+
     json_body = [
         {
             "measurement": sensor,
             "time": current_time,
-            "tags": {
-                "location": location,
-            },
+            "tags": tags,
             "fields": {
                 measurement: value,
             },
