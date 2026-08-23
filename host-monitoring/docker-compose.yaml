@@ -29,58 +29,30 @@ services:
     # networks:
     #   - influxdb
     privileged: true
-    user: telegraf:995
+    # GID of the host's `docker` group, so telegraf (non-root) can read
+    # /var/run/docker.sock for inputs.docker. Differs per host — set in
+    # host-monitoring/.env (not committed). Check with `getent group docker`.
+    user: telegraf:${DOCKER_GID:-995}
     volumes:
       - ../volumes/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
       - /:/hostfs:ro
       - /var/run/docker.sock:/var/run/docker.sock
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor-arm64:v0.49.2
-    container_name: cadvisor
-    hostname: ${HOSTNAME:-unknown_hostname}
-    # links:
-    #   - influxdb:influxsrv
-    command: 
-      - '-storage_driver=influxdb'
-      - '-storage_driver_db=cadvisor'
-      - '-storage_driver_host=192.168.10.18:8086'
-      # - '-housekeeping_interval=15s'
-      # - '-docker_only=true'
-      # - '-store_container_labels=false'
-    restart: unless-stopped
-    privileged: true
-    # networks:
-    #   - internal
-    # expose:
-    #   - 8080
-    # restart: always
-    # ports:
-    #   - "8080:8080"
-    devices:
-      - /dev/kmsg
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-      - /etc/machine-id:/etc/machine-id:ro
-
+  # cadvisor: dropped in favor of telegraf's own [[inputs.docker]] — much lighter
+  # on RAM/CPU, and avoids cadvisor's cgroup memory-controller issues on the Pis
+  # that boot with cgroup_disable=memory. Historical data lives in the influxdb
+  # "cadvisor" database if ever needed again.
+  #
   # cadvisor:
-  #   container_name: monitoring-cadvisor
-  #   image: gcr.io/cadvisor/cadvisor:v0.49.1
-  #   hostname: rpi-cadvisor
+  #   image: gcr.io/cadvisor/cadvisor-arm64:v0.49.2
+  #   container_name: cadvisor
+  #   hostname: ${HOSTNAME:-unknown_hostname}
+  #   command:
+  #     - '-storage_driver=influxdb'
+  #     - '-storage_driver_db=cadvisor'
+  #     - '-storage_driver_host=${INFLUXDB_HOST:-192.168.10.18}:8086'
   #   restart: unless-stopped
   #   privileged: true
-  #   networks:
-  #     - internal
-  #   expose:
-  #     - 8080
-  #   command:
-  #     - '-housekeeping_interval=15s'
-  #     - '-docker_only=true'
-  #     - '-store_container_labels=false'
   #   devices:
   #     - /dev/kmsg
   #   volumes:
