@@ -4,3 +4,6 @@ HOST_SYS=/hostfs/sys
 HOST_VAR=/hostfs/var
 HOST_RUN=/hostfs/run
 HOST_MOUNT_PREFIX=/hostfs
+
+# InfluxDB always lives on lothlorien, same for every host in the fleet.
+INFLUXDB_HOST=192.168.10.18

@@ -11,3 +11,6 @@ volumes/grafana/conf/grafana.ini.bak
 volumes/lost+found/
 volumes/influxdb.ancient/
 volumes/volumes.old/
+
+# per-host values (hostname, docker group gid) — see host-monitoring/.env.example
+host-monitoring/.env
