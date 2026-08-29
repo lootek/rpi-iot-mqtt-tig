@@ -353,18 +353,25 @@ group(F_MQTT, "sensor-health", 10 * MIN, [
     # catches it.
     rule(
         "iot-dht22-flatlined", "DHT22 reading flatlined", F_MQTT, "sensor-health",
+        # spread() (max-min), not stddev. A thermally stable room legitimately has
+        # a tiny stddev -- basement measured 0.035 over 6h and tripped a stddev<0.05
+        # test while actually moving 21.9->22.1. Spread asks the sharper question:
+        # has the reading moved *at all*? DHT22 resolution is 0.1 C, so a working
+        # sensor always spreads >=0.1 (the calmest room, basement, spreads 0.2),
+        # while a frozen one spreads exactly 0.0.
         [query("A", DS_MQTT,
-               f'SELECT stddev("temperature") FROM "dht22" WHERE $timeFilter '
+               f'SELECT spread("temperature") FROM "dht22" WHERE $timeFilter '
                f'AND "location" =~ /{rx(DHT22_ALL)}/ GROUP BY "location"', 6 * HOUR),
          reduce("B", "A", "last"), threshold("C", "B", "lt", 0.05)],
         "C", "1h", "warning",
         summary="{{ $labels.location }}: DHT22 stuck on one value for 6h",
         description=(
             "Room:      {{ $labels.location }}\n"
-            'Measured:  stddev {{ printf "%.3f" $values.B.Value }} C over 6h\n'
-            "Threshold: below 0.05 C\n\n"
+            'Measured:  reading moved {{ printf "%.1f" $values.B.Value }} C over 6h\n'
+            "Threshold: below 0.05 C of total movement\n\n"
             "The sensor is still publishing, so liveness checks see nothing wrong,\n"
-            "but the reading has not moved. Real rooms always drift a little.\n"
+            "but the value has not changed by even one 0.1 C step in six hours.\n"
+            "Real rooms always drift; the calmest one here moves 0.2 C.\n"
             "Usually a wedged DHT22 or a stuck one-wire read.\n"
             "Action: power-cycle the node."
         ),

@@ -96,7 +96,7 @@ and the CO2-high rule silently stops protecting the room.
 ### MQTT / sensor-health (10m)
 | rule | fires when | for | severity |
 |---|---|---|---|
-| DHT22 reading flatlined | stddev < 0.05 °C over 6h | 1h | warning |
+| DHT22 reading flatlined | reading has not moved 0.1 °C in 6h | 1h | warning |
 | DHT22 implausible readings | >3 samples outside 5–40 °C in 6h | 1h | info |
 | DHT22 humidity pegged at rail | >10 samples at >99.8% or <1% RH in 6h | 1h | info |
 | Wi-Fi link marginal — **paused** | 15-min median RSSI < −85 dBm | 30m | info |
@@ -166,5 +166,11 @@ always get through.
   was written, just under the 75% line. Raise it if it nags.
 - **Swap nearly full**: lothlorien was at 99.96% at deploy, so this fires
   immediately. That is a true positive, not mistuning.
+- **DHT22 reading flatlined** uses `spread()` (max−min), not `stddev`. A stddev
+  test at 0.05 flagged `basement` on the first evaluation, but basement was
+  genuinely moving 21.9→22.1 °C — it is simply a thermally stable room. Spread
+  asks the sharper question, *has the value moved at all*: DHT22 resolution is
+  0.1 °C, the calmest room spreads 0.2 °C over 6h, and a frozen sensor spreads
+  exactly 0.0. That leaves 4× headroom instead of a coin-flip.
 - **RootFS**: replaces a hand-made rule that fired at 60% while hosts sat at
   29–48% — below any real risk, which trained everyone to ignore it.
