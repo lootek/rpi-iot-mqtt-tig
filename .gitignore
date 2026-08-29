@@ -14,3 +14,7 @@ volumes/volumes.old/
 
 # per-host values (hostname, docker group gid) — see host-monitoring/.env.example
 host-monitoring/.env
+
+# Grafana service-account token for central-stack/alerting/apply.sh
+central-stack/alerting/.grafana.env
+central-stack/alerting/__pycache__/
