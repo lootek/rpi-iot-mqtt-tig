@@ -1,0 +1,997 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "neutral": 20
+          },
+          "decimals": 1,
+          "mappings": [],
+          "max": 35,
+          "min": -10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              },
+              {
+                "color": "semi-dark-blue",
+                "value": 0
+              },
+              {
+                "color": "light-green",
+                "value": 15
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "#EAB839",
+                "value": 24
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 25
+              },
+              {
+                "color": "dark-red",
+                "value": 28
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 21,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 5,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/temperature\", \"/sensors/basement/dht22/temperature\", \"/sensors/arbor/dht22/temperature\", \"/sensors/office/dht22/temperature\", \"/sensors/living_room/dht22/temperature\",\"/sensors/bedroom/dht22/temperature\",\"/sensors/kitchen/dht22/temperature\",\"/sensors/kids_room_1/dht22/temperature\",\"/sensors/kids_room_2/dht22/temperature\",\"/sensors/garage/dht22/temperature\",\"/sensors/bathroom_1/dht22/temperature\",\"/sensors/bathroom_2/dht22/temperature\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "now-15m",
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "neutral": 800
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 2500,
+          "min": 400,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-blue",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 400
+              },
+              {
+                "color": "light-green",
+                "value": 800
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 1500
+              },
+              {
+                "color": "dark-red",
+                "value": 2500
+              },
+              {
+                "color": "#4d1200",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ppm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 7,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "scd30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/temperature\", \"/sensors/basement/dht22/temperature\", \"/sensors/arbor/dht22/temperature\", \"/sensors/office/dht22/temperature\", \"/sensors/living_room/dht22/temperature\",\"/sensors/bedroom/dht22/temperature\",\"/sensors/kitchen/dht22/temperature\",\"/sensors/kids_room_1/dht22/temperature\",\"/sensors/kids_room_2/dht22/temperature\",\"/sensors/garage/dht22/temperature\",\"/sensors/bathroom_1/dht22/temperature\",\"/sensors/bathroom_2/dht22/temperature\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "co2"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ]
+        }
+      ],
+      "timeFrom": "now-15m",
+      "title": "CO2",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "neutral": 20
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-orange",
+                "value": null
+              },
+              {
+                "color": "dark-yellow",
+                "value": 30
+              },
+              {
+                "color": "dark-green",
+                "value": 45
+              },
+              {
+                "color": "semi-dark-blue",
+                "value": 65
+              },
+              {
+                "color": "#003584",
+                "value": 75
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 21,
+        "x": 0,
+        "y": 8
+      },
+      "hideTimeOverride": true,
+      "id": 6,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "humidity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": "now-15m",
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 23,
+            "axisSoftMin": 20,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "!=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "AND",
+              "key": "location::tag",
+              "operator": "!=",
+              "value": "patio"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "scd30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ]
+        }
+      ],
+      "title": "Temperature [°C]",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 60,
+            "axisSoftMin": 45,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "humidity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "!=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "AND",
+              "key": "location::tag",
+              "operator": "!=",
+              "value": "patio"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "scd30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "humidity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "!=",
+              "value": "arbor"
+            }
+          ]
+        }
+      ],
+      "title": "Relative humidity [%]",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 2600,
+            "axisSoftMin": 400,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 400
+              },
+              {
+                "color": "light-green",
+                "value": 800
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 1500
+              },
+              {
+                "color": "dark-red",
+                "value": 2500
+              },
+              {
+                "color": "#4d1200",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ppm"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "office"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8F3BB8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "scd30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "co2"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "max"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "CO2 concentration",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Room conditions",
+  "uid": "aem53k0pia29sd",
+  "version": 23,
+  "weekStart": ""
+}

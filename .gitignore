@@ -18,3 +18,5 @@ host-monitoring/.env
 # Grafana service-account token for central-stack/alerting/apply.sh
 central-stack/alerting/.grafana.env
 central-stack/alerting/__pycache__/
+central-stack/dashboards/.grafana.env
+central-stack/dashboards/__pycache__/

@@ -1,0 +1,1275 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "neutral": 20
+          },
+          "decimals": 1,
+          "mappings": [],
+          "max": 35,
+          "min": -10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              },
+              {
+                "color": "semi-dark-blue",
+                "value": 0
+              },
+              {
+                "color": "light-green",
+                "value": 15
+              },
+              {
+                "color": "dark-green",
+                "value": 20
+              },
+              {
+                "color": "#EAB839",
+                "value": 23
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 25
+              },
+              {
+                "color": "dark-red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 5,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/temperature\", \"/sensors/basement/dht22/temperature\", \"/sensors/arbor/dht22/temperature\", \"/sensors/office/dht22/temperature\", \"/sensors/living_room/dht22/temperature\",\"/sensors/bedroom/dht22/temperature\",\"/sensors/kitchen/dht22/temperature\",\"/sensors/kids_room_1/dht22/temperature\",\"/sensors/kids_room_2/dht22/temperature\",\"/sensors/garage/dht22/temperature\",\"/sensors/bathroom_1/dht22/temperature\",\"/sensors/bathroom_2/dht22/temperature\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "OR",
+              "key": "location::tag",
+              "operator": "=",
+              "value": "patio"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "now-15m",
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "neutral": 20
+          },
+          "decimals": 0,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-orange",
+                "value": null
+              },
+              {
+                "color": "dark-yellow",
+                "value": 30
+              },
+              {
+                "color": "dark-green",
+                "value": 40
+              },
+              {
+                "color": "dark-blue",
+                "value": 60
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 6,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "humidity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "OR",
+              "key": "location::tag",
+              "operator": "=",
+              "value": "patio"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "now-15m",
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 180,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "#EAB839",
+                "value": 40
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "dark-orange",
+                "value": 100
+              },
+              {
+                "color": "dark-red",
+                "value": 150
+              }
+            ]
+          },
+          "unit": "conμgm3"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "sps30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "mc_10p0"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "mc_4p0"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 20
+              },
+              {
+                "color": "orange",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 50
+              },
+              {
+                "color": "dark-red",
+                "value": 75
+              }
+            ]
+          },
+          "unit": "conμgm3"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 15,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "sps30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "mc_2p5"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "mc_1p0"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 25,
+            "axisSoftMin": 18,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/temperature\", \"/sensors/basement/dht22/temperature\", \"/sensors/arbor/dht22/temperature\", \"/sensors/office/dht22/temperature\", \"/sensors/living_room/dht22/temperature\",\"/sensors/bedroom/dht22/temperature\",\"/sensors/kitchen/dht22/temperature\",\"/sensors/kids_room_1/dht22/temperature\",\"/sensors/kids_room_2/dht22/temperature\",\"/sensors/garage/dht22/temperature\",\"/sensors/bathroom_1/dht22/temperature\",\"/sensors/bathroom_2/dht22/temperature\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "temperature"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "OR",
+              "key": "location::tag",
+              "operator": "=",
+              "value": "patio"
+            }
+          ]
+        }
+      ],
+      "title": "Temperature",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 60,
+            "axisSoftMin": 45,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "alias": "$tag_location",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "location::tag"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "dht22",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"value\" FROM \"/sensors/attic/dht22/humidity\", \"/sensors/basement/dht22/humidity\", \"/sensors/arbor/dht22/humidity\", \"/sensors/office/dht22/humidity\", \"/sensors/living_room/dht22/humidity\",\"/sensors/bedroom/dht22/humidity\",\"/sensors/kitchen/dht22/humidity\",\"/sensors/kids_room_1/dht22/humidity\",\"/sensors/kids_room_2/dht22/humidity\",\"/sensors/garage/dht22/humidity\",\"/sensors/bathroom_1/dht22/humidity\",\"/sensors/bathroom_2/dht22/humidity\"",
+          "rawQuery": false,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "humidity"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "location::tag",
+              "operator": "=",
+              "value": "backyard_shed"
+            },
+            {
+              "condition": "OR",
+              "key": "location::tag",
+              "operator": "=",
+              "value": "patio"
+            }
+          ]
+        }
+      ],
+      "title": "Relative humidity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 160,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "#EAB839",
+                "value": 40
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "dark-orange",
+                "value": 100
+              },
+              {
+                "color": "dark-red",
+                "value": 150
+              }
+            ]
+          },
+          "unit": "conμgm3"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "sps30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT\n  mean(\"mc_10p0\") AS \"mc_10p0\",\n  mean(\"mc_4p0\")  AS \"mc_4p0\"\nFROM \"sps30\"\nWHERE $timeFilter\nGROUP BY time(5m) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "mc_10p0"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "mc_4p0"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Mass concentration (PM10)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 80,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 10
+              },
+              {
+                "color": "#EAB839",
+                "value": 20
+              },
+              {
+                "color": "orange",
+                "value": 25
+              },
+              {
+                "color": "dark-orange",
+                "value": 50
+              },
+              {
+                "color": "dark-red",
+                "value": 75
+              }
+            ]
+          },
+          "unit": "conμgm3"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "sps30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT\n  mean(\"mc_2p5\") AS \"mc_2p5\",\n  mean(\"mc_1p0\")  AS \"mc_1p0\"\nFROM \"sps30\"\nWHERE $timeFilter\nGROUP BY time(5m) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "mc_2p5"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "mc_1p0"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Mass concentration (PM2.5)",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": 3600000,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "groupBy": [],
+          "hide": false,
+          "measurement": "sps30",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT\n  mean(\"nc_10p0\") AS \"nc_10p0\",\n  mean(\"nc_4p0\") AS \"nc_4p0\",\n  mean(\"nc_2p5\") AS \"nc_2p5\",\n  mean(\"nc_1p0\") AS \"nc_1p0\",\n  mean(\"nc_0p5\")  AS \"nc_0p5\"\nFROM \"sps30\"\nWHERE $timeFilter\nGROUP BY time(5m) fill(null)\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "nc_10p0"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "nc_4p0"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "nc_2p5"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "nc_1p0"
+                ],
+                "type": "field"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "nc_0p5"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Number concentration (per cm3)",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "id": 16,
+      "options": {
+        "alertInstanceLabelFilter": "",
+        "alertName": "",
+        "dashboardAlerts": false,
+        "datasource": "-- Grafana --",
+        "folder": {
+          "title": "MQTT",
+          "uid": "ed1f5847-d688-4bcd-a726-8b0255a22282"
+        },
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 20,
+        "showInactiveAlerts": false,
+        "sortOrder": 1,
+        "stateFilter": {
+          "error": true,
+          "firing": true,
+          "noData": true,
+          "normal": false,
+          "pending": true
+        },
+        "viewMode": "list"
+      },
+      "pluginVersion": "11.5.1",
+      "title": "",
+      "type": "alertlist"
+    }
+  ],
+  "preload": false,
+  "refresh": "1h",
+  "schemaVersion": 40,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Weather conditions",
+  "uid": "fe73ea07-6206-434f-a250-995f782924e2",
+  "version": 56,
+  "weekStart": ""
+}
