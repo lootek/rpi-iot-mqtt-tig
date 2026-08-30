@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Block committing SMTP credentials, or any secret file, into this public repo.
+
+This exists because it already nearly went wrong once. `volumes/grafana/conf/`
+is simultaneously the git working tree AND the directory bind-mounted into the
+Grafana container, so the live config and the tracked file are the same bytes.
+In Jan 2026 the real Gmail password sat in grafana.ini on that path; it stayed
+out of history only because someone remembered to hand-replace it with a
+placeholder before committing. Manual discipline is not a control.
+
+Install (once per clone):
+    git config core.hooksPath hooks
+"""
+
+import re
+import subprocess
+import sys
+
+# A password line is acceptable only if it is obviously not a real secret:
+# empty, or a <placeholder> in angle brackets.
+PLACEHOLDER = re.compile(r"^\s*password\s*=\s*(<[^>]*>)?\s*$", re.I)
+PASSWORD_LINE = re.compile(r"^\s*password\s*=", re.I)
+
+# Files that must never be tracked at all, regardless of content.
+NEVER_TRACK = (
+    re.compile(r"(^|/)env/[^/]*\.secret$"),
+    re.compile(r"(^|/)\.grafana\.env$"),
+    re.compile(r"(^|/)msmtprc$"),
+)
+
+SECRET_VALUES = [
+    (re.compile(r"glsa_[A-Za-z0-9]{16,}"), "Grafana service-account token"),
+    (re.compile(r"gh[pos]_[A-Za-z0-9]{20,}"), "GitHub token"),
+    (re.compile(r"AKIA[0-9A-Z]{16}"), "AWS access key id"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "private key"),
+    (re.compile(r"://[^/\s:@]+:[^/\s@]+@"), "credentials in a URL"),
+]
+
+
+def staged_files():
+    out = subprocess.run(["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
+                         capture_output=True, text=True).stdout
+    return [f for f in out.splitlines() if f]
+
+
+def staged_content(path):
+    r = subprocess.run(["git", "show", f":{path}"], capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else ""
+
+
+def main():
+    problems = []
+
+    for path in staged_files():
+        for pattern in NEVER_TRACK:
+            if pattern.search(path):
+                problems.append(f"{path}: secret file must never be tracked")
+
+        content = staged_content(path)
+        if not content:
+            continue
+
+        # A password= line that is not a placeholder, in any config file.
+        for n, line in enumerate(content.splitlines(), 1):
+            if line.lstrip().startswith((";", "#")):
+                continue
+            if PASSWORD_LINE.match(line) and not PLACEHOLDER.match(line):
+                problems.append(
+                    f"{path}:{n}: real-looking password. Keep the tracked file's "
+                    "<placeholder> and put the value in env/grafana.secret "
+                    "(gitignored), which GF_SMTP_PASSWORD reads.")
+
+        # Per-line, skipping comments. Grafana's and Telegraf's shipped configs
+        # are full of commented example credentials ( ;url = mysql://user:secret@... ).
+        # Flagging those would block every honest commit and teach people to
+        # reach for --no-verify, which is worse than no hook at all.
+        for n, line in enumerate(content.splitlines(), 1):
+            if line.lstrip().startswith((";", "#", "//")):
+                continue
+            for pattern, name in SECRET_VALUES:
+                m = pattern.search(line)
+                if m:
+                    problems.append(f"{path}:{n}: {name} ({m.group(0)[:24]}...)")
+
+    if problems:
+        print("pre-commit: refusing to commit\n", file=sys.stderr)
+        for p in problems:
+            print(f"  {p}", file=sys.stderr)
+        print("\nThis repo is public. Override only if you are certain:"
+              "\n  git commit --no-verify", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
