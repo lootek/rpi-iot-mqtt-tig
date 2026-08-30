@@ -47,7 +47,7 @@ def load_env():
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
                 env[k] = v
-    url = os.environ.get("GRAFANA_URL", env.get("GRAFANA_URL", "http://lothlorien:3000"))
+    url = os.environ.get("GRAFANA_URL", env.get("GRAFANA_URL", "http://192.168.10.18:3000"))
     tok = os.environ.get("GRAFANA_TOKEN", env.get("GRAFANA_TOKEN"))
     if not tok:
         sys.exit("need GRAFANA_TOKEN (see .grafana.env.example)")

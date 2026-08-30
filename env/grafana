@@ -1,1 +1,7 @@
 GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
+# Absolute URL Grafana stamps into generated links (alert emails, silence links).
+# Without this it defaults to domain=localhost, so every button in an alert mail
+# points at http://localhost:3000 and is dead on a phone. IP, not hostname --
+# `lothlorien` does not resolve on the router.
+GF_SERVER_DOMAIN=192.168.10.18
+GF_SERVER_ROOT_URL=http://192.168.10.18:3000/

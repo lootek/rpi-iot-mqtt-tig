@@ -20,3 +20,6 @@ central-stack/alerting/.grafana.env
 central-stack/alerting/__pycache__/
 central-stack/dashboards/.grafana.env
 central-stack/dashboards/__pycache__/
+
+# Grafana SMTP credential — never commit
+env/grafana.secret

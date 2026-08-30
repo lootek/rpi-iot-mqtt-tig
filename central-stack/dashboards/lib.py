@@ -48,7 +48,7 @@ def load_env():
                     k, v = line.split("=", 1)
                     env.setdefault(k, v)
             break
-    url = os.environ.get("GRAFANA_URL", env.get("GRAFANA_URL", "http://lothlorien:3000"))
+    url = os.environ.get("GRAFANA_URL", env.get("GRAFANA_URL", "http://192.168.10.18:3000"))
     tok = os.environ.get("GRAFANA_TOKEN", env.get("GRAFANA_TOKEN"))
     if not tok:
         sys.exit("need GRAFANA_TOKEN (set GRAFANA_ENV_FILE, or create .grafana.env)")

@@ -23,7 +23,9 @@ DS_TELEGRAF = "be414ba9-5127-4be8-a621-e910639f96b1"  # InfluxDB Telegraf (db: t
 F_MQTT = "ed1f5847-d688-4bcd-a726-8b0255a22282"       # folder "MQTT"
 F_HOST = "a129b860-4707-4296-8eaa-0dee5978b4db"       # folder "Host monitoring"
 
-GRAFANA_BASE = "http://lothlorien:3000"
+# IP, not hostname: `lothlorien` does not resolve on the router, so a hostname
+# link in an alert email is dead on a phone. Matches root_url in grafana.ini.
+GRAFANA_BASE = "http://192.168.10.18:3000"
 DASH_ROOM = "aem53k0pia29sd"   # Room conditions
 DASH_NODES = "000000127"       # Nodes
 
