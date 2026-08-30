@@ -24,11 +24,17 @@ import lib
 SUBDIR = os.path.join("central-stack", "dashboards")
 
 
-def git(repo, *args, check=True):
+def git(repo, *args, check=True, raw=False):
+    """Run git. raw=True preserves output verbatim.
+
+    porcelain status records begin with a status column that is a SPACE for
+    unstaged changes (" M path"), so stripping would shift every subsequent
+    field by one character.
+    """
     r = subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True)
     if check and r.returncode != 0:
         sys.exit(f"git {' '.join(args)} failed:\n{r.stderr.strip()}")
-    return r.stdout.strip()
+    return r.stdout if raw else r.stdout.strip()
 
 
 def export_all(api, dest):
@@ -103,12 +109,14 @@ def main():
     for p in pruned:
         print(f"  pruned (deleted in Grafana): {p}")
 
-    status = git(repo, "status", "--porcelain", "--", SUBDIR)
+    # -z (NUL-separated, no C-quoting) because folder names contain spaces --
+    # "Host monitoring" -- and plain --porcelain wraps those paths in quotes.
+    status = git(repo, "status", "--porcelain", "-z", "--", SUBDIR, raw=True)
     if not status:
         print("no changes")
         return 0
 
-    changed = [ln[3:] for ln in status.splitlines()]
+    changed = [rec[3:] for rec in status.split("\0") if len(rec) > 3]
     print(f"{len(changed)} file(s) changed:")
     for c in changed[:20]:
         print(f"  {c}")
