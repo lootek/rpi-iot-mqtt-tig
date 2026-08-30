@@ -121,7 +121,7 @@ reporting* is the rule that would have caught it.
 ### Host monitoring / host-resources (5m)
 | rule | fires when | for | severity |
 |---|---|---|---|
-| Swap nearly full | 1-hour mean > 80% | 30m | warning |
+| Swap exhausted with low memory | swap > 80% **and** available RAM < 20% | 30m | warning |
 | Memory nearly exhausted | 1-hour mean > 90% | 30m | warning |
 | CPU temperature high | > 75 °C | 10m | warning |
 | CPU temperature critical | > 82 °C | 5m | critical |
@@ -164,8 +164,13 @@ always get through.
 
 - **High humidity — mould risk**: dining_room and office sat at 73–74% when this
   was written, just under the 75% line. Raise it if it nags.
-- **Swap nearly full**: lothlorien was at 99.96% at deploy, so this fires
-  immediately. That is a true positive, not mistuning.
+- **Swap exhausted with low memory** requires *both* conditions on purpose.
+  A first version tested swap% alone and fired on lothlorien at 99.96% — which
+  turned out to be meaningless: Raspberry Pi OS ships a 99 MB dphys swapfile that
+  drifts to 100% over months of uptime while RAM stays free (2.3 GB available at
+  the time). Swap exhaustion only matters when memory is *also* short, so the rule
+  ANDs `swap > 80%` with `available_percent < 20%` via a Math node. That is why it
+  has 6 nodes rather than the usual 3.
 - **DHT22 reading flatlined** uses `spread()` (max−min), not `stddev`. A stddev
   test at 0.05 flagged `basement` on the first evaluation, but basement was
   genuinely moving 21.9→22.1 °C — it is simply a thermally stable room. Spread

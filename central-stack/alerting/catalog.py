@@ -537,16 +537,42 @@ def cpu_temp(uid, title, limit, severity, for_="10m"):
 group(F_HOST, "host-resources", 5 * MIN, [
     # lothlorien was at 99.96% when this was written -- expect this to fire
     # immediately on first evaluation. That is a true positive, not mistuning.
-    host_resource(
-        "host-swap-full", "Swap nearly full", "swap", "used_percent", "gt", 80, "30m", "warning",
-        '{{ $labels.host }}: swap {{ printf "%.1f" $values.B.Value }}% used (limit 80%)',
-        "Host:      {{ $labels.host }}\n"
-        'Measured:  {{ printf "%.1f" $values.B.Value }}% of swap in use (1-hour mean)\n'
-        "Threshold: above 80% sustained for 30m\n\n"
-        "On an SD-card Pi, sustained swapping is both a symptom of memory pressure\n"
-        "and a cause of card wear.\n"
-        "Action: find the consumer with `docker stats` / `ps aux --sort=-%mem`,\n"
-        "and clear out stale exited containers with `docker container prune`.",
+    # Swap percentage ALONE is meaningless on these boxes. Raspberry Pi OS ships a
+    # 99 MB dphys swapfile, and after enough uptime it sits at 100% simply because
+    # pages swapped out long ago were never faulted back in -- lothlorien showed
+    # 99Mi/99Mi while 2.3 GB of RAM was free. A threshold on swap% alone therefore
+    # fires on healthy machines and trains you to ignore it.
+    #
+    # Swap exhaustion only matters when RAM is *also* short, so this requires both:
+    # swap > 80% AND available memory < 20%. The Math node ($E) ANDs them, which is
+    # why this rule has 6 nodes instead of the usual 3.
+    rule(
+        "host-swap-full", "Swap exhausted with low memory", F_HOST, "host-resources",
+        [query("A", DS_TELEGRAF,
+               f'SELECT mean("used_percent") FROM "swap" WHERE $timeFilter '
+               f'AND "host" =~ /{rx(HOSTS)}/ GROUP BY "host"', 1 * HOUR),
+         query("B", DS_TELEGRAF,
+               f'SELECT mean("available_percent") FROM "mem" WHERE $timeFilter '
+               f'AND "host" =~ /{rx(HOSTS)}/ GROUP BY "host"', 1 * HOUR),
+         reduce("C", "A", "last"), reduce("D", "B", "last"),
+         math("E", "($C > 80) && ($D < 20)"),
+         threshold("F", "E", "gt", 0)],
+        "F", "30m", "warning",
+        summary='{{ $labels.host }}: swap {{ printf "%.0f" $values.C.Value }}% full and only '
+                '{{ printf "%.0f" $values.D.Value }}% memory available',
+        description=(
+            "Host:      {{ $labels.host }}\n"
+            'Swap:      {{ printf "%.1f" $values.C.Value }}% used (1-hour mean)\n'
+            'Memory:    {{ printf "%.1f" $values.D.Value }}% available (1-hour mean)\n'
+            "Threshold: swap above 80% AND available memory below 20%, for 30m\n\n"
+            "Both conditions are required on purpose. These Pis run a 99 MB dphys\n"
+            "swapfile that drifts to 100% over months of uptime while RAM stays free;\n"
+            "that state is harmless and must not page anyone. Real trouble is swap\n"
+            "full *and* RAM short, which on an SD card means thrashing and card wear.\n\n"
+            "Action: find the consumer with `docker stats` and `ps aux --sort=-%mem`.\n"
+            "A reboot clears the swapfile but does not fix a genuine memory leak."
+        ),
+        domain="host", dashboard=DASH_NODES,
     ),
     host_resource(
         "host-mem-high", "Memory nearly exhausted", "mem", "used_percent", "gt", 90, "30m", "warning",
