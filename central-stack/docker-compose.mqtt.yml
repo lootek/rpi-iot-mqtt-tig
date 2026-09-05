@@ -10,6 +10,11 @@ services:
       context: .
     container_name: mqtt-to-influxdb
     restart: unless-stopped
+    # Shared with aqicn-ui: we publish status.json here, it publishes pause.json.
+    volumes:
+      - ../volumes/aqicn:/state
+    environment:
+      - AQICN_STATE_DIR=/state
     depends_on:
       - mosquitto
 

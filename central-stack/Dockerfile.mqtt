@@ -10,5 +10,6 @@ COPY requirements.txt .
 ENV MSGPACK_PUREPYTHON=1
 RUN pip install --user -r requirements.txt
 
+COPY aqicn_state.py .
 COPY mqtt-listener.py .
 CMD ["python", "-u", "/code/mqtt-listener.py"]

@@ -8,6 +8,8 @@ import paho.mqtt.client as mqtt
 import requests
 from influxdb import InfluxDBClient
 
+from aqicn_state import AqicnState
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 influx_client_mqtt = InfluxDBClient("192.168.10.18", 8086, database="mqtt")
@@ -27,6 +29,14 @@ AQICN_STATION_LONGITUDE = os.getenv("AQICN_STATION_LONGITUDE")
 AQICN_API_URL = os.getenv("AQICN_API_URL", "https://aqicn.org/sensor/upload")
 AQICN_TIMEOUT = float(os.getenv("AQICN_TIMEOUT", "5"))
 AQICN_MIN_UPLOAD_INTERVAL = float(os.getenv("AQICN_MIN_UPLOAD_INTERVAL", "300"))
+
+# Shared with the aqicn-ui container over a bind mount: it writes the pause,
+# we write the readings and upload receipts it displays.
+AQICN_STATE = AqicnState(
+    os.getenv("AQICN_STATE_DIR", "/state"),
+    station_id=AQICN_STATION_ID,
+    min_upload_interval=AQICN_MIN_UPLOAD_INTERVAL,
+)
 
 
 def extract_sensor_data(path):
@@ -61,6 +71,12 @@ def extract_sensor_data(path):
 
 
 def push_to_aqicn(measurement_key, value):
+    # Checked before anything accumulates, so resuming rebuilds the payload from
+    # fresh readings rather than shipping whatever was in flight when the fire
+    # was lit.
+    if AQICN_STATE.paused():
+        return
+
     if not AQICN_TOKEN or not AQICN_STATION_ID:
         logging.warning(
             "AQICN_TOKEN or AQICN_STATION_ID not set; skipping push to AQICN"
@@ -107,11 +123,14 @@ def push_to_aqicn(measurement_key, value):
         response.raise_for_status()
         print(f"AQICN: Data uploaded successfully for {AQICN_STATION_ID}")
 
+        AQICN_STATE.record_upload(readings, ok=True)
+
         AQICN_LAST_MEASUREMENT = {
             "last_upload": now,
         }
     except requests.RequestException as error:
         logging.error("Failed to push to AQICN: %s", error)
+        AQICN_STATE.record_upload(readings, ok=False, error=str(error))
 
 
 def save_msg(msg):
@@ -151,6 +170,11 @@ def save_msg(msg):
         if measurement_key in AQICN_MEASUREMENTS_KEYS_MAP and isinstance(
             value, (int, float)
         ):
+            # Recorded before the upload attempt and regardless of its outcome,
+            # so the UI keeps showing live readings throughout a pause.
+            AQICN_STATE.record_reading(
+                AQICN_MEASUREMENTS_KEYS_MAP[measurement_key], value
+            )
             push_to_aqicn(measurement_key, value)
 
     tags = {"location": location}
