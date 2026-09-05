@@ -402,12 +402,20 @@
 
     const upload = view.status && view.status.last_upload;
 
+    // With no status file at all we know the pause state but nothing else, and
+    // claiming "Uploading" would look identical to a listener that has died.
+    const heard = Boolean(view.status && view.status.updated_at);
+
     if (view.paused) {
       $("verb").textContent = "Not uploading";
       $("verb-note").textContent = "Readings stay local. AQICN keeps the last value it got.";
+    } else if (!heard) {
+      $("verb").textContent = "No readings";
+      $("verb-note").textContent =
+        "Nothing published by the listener yet. Check the mqtt-to-influxdb container.";
     } else {
       $("verb").textContent = "Uploading";
-      $("verb-note").innerHTML = upload && upload.at
+      $("verb-note").textContent = upload && upload.at
         ? "Last sent " + ago(Math.round(serverNow() - upload.at)) + "."
         : "Nothing sent yet.";
     }
