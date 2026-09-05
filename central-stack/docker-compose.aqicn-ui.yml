@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  # LAN-only control page for pausing AQICN uploads during a backyard campfire.
+  # No credentials, no outbound connections: it only reads the status file the
+  # listener writes and writes the pause file the listener honours.
+  aqicn-ui:
+    image: aqicn-ui:latest
+    build:
+      context: ./aqicn-ui
+      dockerfile: Dockerfile
+    container_name: aqicn-ui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../volumes/aqicn:/state
+    environment:
+      - AQICN_STATE_DIR=/state

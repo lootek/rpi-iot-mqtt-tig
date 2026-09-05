@@ -23,3 +23,7 @@ central-stack/dashboards/__pycache__/
 
 # Grafana SMTP credential — never commit
 env/grafana.secret
+
+# Runtime state shared between mqtt-to-influxdb and aqicn-ui
+volumes/aqicn/
+__pycache__/

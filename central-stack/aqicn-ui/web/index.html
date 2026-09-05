@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0B0F14">
+<title>Patio air · upload control</title>
+<style>
+  :root {
+    --ink:        #0B0F14;
+    --ink-raised: #131A22;
+    --line:       #1F2A35;
+    --mist:       #7C8B99;
+    --clear:      #E6EDF3;
+    --held:       #5FA8D3;
+
+    /* The accent is not a brand colour. It is set from the live reading. */
+    --accent: var(--mist);
+
+    --gap: 20px;
+    --tap: 60px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    padding: max(20px, env(safe-area-inset-top)) 20px
+             max(28px, env(safe-area-inset-bottom));
+    background: var(--ink);
+    color: var(--clear);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    max-width: 460px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Wide-tracked uppercase micro-labels: the vernacular of an instrument face. */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mist);
+  }
+
+  /* ---- masthead ---------------------------------------------------- */
+
+  header { display: flex; flex-direction: column; gap: 14px; }
+
+  .station { display: flex; justify-content: space-between; gap: 12px; }
+
+  .verb {
+    font-size: 30px;
+    font-weight: 640;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: var(--accent);
+    transition: color 400ms ease;
+  }
+
+  /* While paused the headline leaves the AQI scale, so the state of the upload
+     and the state of the air stay legible as two separate things. */
+  body.paused .verb { color: var(--held); }
+
+  .verb-note { color: var(--mist); font-size: 14px; }
+  .verb-note .mono { font-size: 14px; color: var(--clear); }
+
+  /* ---- readings ---------------------------------------------------- */
+
+  .panel {
+    background: var(--ink-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 20px;
+  }
+
+  .primary {
+    border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+    transition: border-color 400ms ease;
+  }
+
+  .primary-value {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .primary-value b {
+    font-size: 68px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+    transition: color 400ms ease;
+  }
+
+  .primary-value span { font-size: 15px; color: var(--mist); }
+
+  .primary-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .trio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .trio div { display: flex; flex-direction: column; gap: 5px; }
+  .trio b { font-size: 21px; font-weight: 500; line-height: 1; }
+  .trio .age { font-size: 11px; color: var(--mist); }
+
+  .stale b, .stale .primary-value b { color: var(--mist); }
+
+  /* ---- controls ---------------------------------------------------- */
+
+  .controls { display: flex; flex-direction: column; gap: 12px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  button {
+    min-height: var(--tap);
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--ink-raised);
+    color: var(--clear);
+    font: inherit;
+    font-weight: 560;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  button:hover { border-color: var(--mist); }
+  button:active { background: #1A232D; }
+
+  button:focus-visible {
+    outline: 2px solid var(--held);
+    outline-offset: 2px;
+  }
+
+  .resume {
+    background: var(--held);
+    border-color: var(--held);
+    color: #06131C;
+    font-weight: 640;
+  }
+
+  .resume:hover { border-color: var(--clear); }
+
+  .countdown {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .countdown b {
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--held);
+  }
+
+  /* ---- receipt ----------------------------------------------------- */
+
+  .receipt { display: flex; flex-direction: column; gap: 10px; }
+
+  .receipt dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .receipt dt { color: var(--mist); }
+  .receipt dd { margin: 0; text-align: right; }
+
+  .failed { color: #E4574F; }
+
+  /* ---- connection notice ------------------------------------------- */
+
+  .offline {
+    border: 1px solid #E4574F;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #E4574F;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <div class="station">
+      <span class="label">Patio</span>
+      <span class="label mono" id="station">—</span>
+    </div>
+    <div>
+      <div class="verb" id="verb">Connecting</div>
+      <div class="verb-note" id="verb-note">Reading the station.</div>
+    </div>
+  </header>
+
+  <p class="offline" id="offline" hidden>Can't reach the station. Retrying.</p>
+
+  <section class="panel primary" id="primary">
+    <div class="primary-value">
+      <b class="mono" id="pm25">—</b>
+      <span>µg/m³</span>
+    </div>
+    <div class="primary-foot">
+      <span class="label">PM2.5</span>
+      <span class="label mono" id="pm25-age"></span>
+    </div>
+
+    <div class="trio">
+      <div>
+        <span class="label">PM10</span>
+        <b class="mono" id="pm10">—</b>
+        <span class="age mono" id="pm10-age"></span>
+      </div>
+      <div>
+        <span class="label">Temp</span>
+        <b class="mono" id="temp">—</b>
+        <span class="age mono" id="temp-age"></span>
+      </div>
+      <div>
+        <span class="label">Humidity</span>
+        <b class="mono" id="humidity">—</b>
+        <span class="age mono" id="humidity-age"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="controls" id="controls-run">
+    <span class="label">Stop uploading for</span>
+    <div class="grid">
+      <button type="button" data-seconds="3600">1 hour</button>
+      <button type="button" data-seconds="10800">3 hours</button>
+      <button type="button" data-seconds="21600">6 hours</button>
+      <button type="button" data-tonight="1">Tonight</button>
+    </div>
+  </section>
+
+  <section class="controls" id="controls-paused" hidden>
+    <div class="panel countdown">
+      <span class="label">Resumes in</span>
+      <b class="mono" id="remaining">—</b>
+    </div>
+    <button type="button" class="resume" id="resume">Start uploading now</button>
+  </section>
+
+  <section class="panel receipt">
+    <div class="station">
+      <span class="label">Last upload to AQICN</span>
+      <span class="label mono" id="upload-when">never</span>
+    </div>
+    <dl class="mono" id="upload-readings"></dl>
+    <p class="failed mono" id="upload-error" hidden></p>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // EPA PM2.5 breakpoints. Used only to choose the accent colour — the number
+  // on screen stays the raw µg/m³ reading, so we never present a computed AQI
+  // as if it were the one AQICN publishes.
+  const BANDS = [
+    { max: 12.0,  color: "#4FC978" },  // good
+    { max: 35.4,  color: "#E3C64B" },  // moderate
+    { max: 55.4,  color: "#E8963C" },  // unhealthy for sensitive groups
+    { max: 150.4, color: "#E4574F" },  // unhealthy
+    { max: 250.4, color: "#A970C4" },  // very unhealthy
+    { max: Infinity, color: "#9C4A55" } // hazardous
+  ];
+
+  const STALE_AFTER = 180;  // seconds; the sensor reports every few seconds
+  const POLL_MS = 5000;
+
+  const $ = (id) => document.getElementById(id);
+  const root = document.documentElement.style;
+
+  let view = null;      // last payload from /api/state
+  let fetchedAt = 0;    // performance.now() when it arrived
+
+  const bandColor = (pm25) =>
+    (BANDS.find((b) => pm25 <= b.max) || BANDS[BANDS.length - 1]).color;
+
+  const fmt = (n, digits) =>
+    n === null || n === undefined ? "—" : Number(n).toFixed(digits);
+
+  function ago(seconds) {
+    if (seconds < 0) return "just now";
+    if (seconds < 60) return seconds + "s ago";
+    if (seconds < 3600) return Math.floor(seconds / 60) + " min ago";
+    const h = Math.floor(seconds / 3600);
+    return h + (h === 1 ? " hour ago" : " hours ago");
+  }
+
+  function clock(seconds) {
+    const s = Math.max(0, seconds);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return h > 0 ? h + ":" + pad(m) + ":" + pad(sec) : pad(m) + ":" + pad(sec);
+  }
+
+  // Seconds until local midnight, computed here because the browser is the only
+  // party that knows the user's timezone.
+  function untilMidnight() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return Math.max(60, Math.round((midnight - now) / 1000));
+  }
+
+  // Server time advanced by the wall clock since the payload arrived, so ages
+  // and countdowns tick smoothly without trusting the phone's clock.
+  const serverNow = () =>
+    view ? view.now + (performance.now() - fetchedAt) / 1000 : 0;
+
+  function reading(key) {
+    const latest = (view && view.status && view.status.latest) || {};
+    return latest[key] || null;
+  }
+
+  function paint(key, digits) {
+    const r = reading(key);
+    const el = $(key);
+    const ageEl = $(key + "-age");
+    el.textContent = r ? fmt(r.value, digits) : "—";
+    if (ageEl) ageEl.textContent = r ? ago(Math.round(serverNow() - r.at)) : "";
+    return r;
+  }
+
+  function render() {
+    if (!view) return;
+
+    const pm25 = paint("pm25", 1);
+    paint("pm10", 1);
+    paint("temp", 1);
+    paint("humidity", 1);
+
+    const stale = !pm25 || serverNow() - pm25.at > STALE_AFTER;
+    $("primary").classList.toggle("stale", stale);
+
+    // The signature: the accent is set by the air, never by us. It stays on the
+    // AQI band even while paused, because "we are not uploading" and "the air is
+    // bad" are two separate facts and you need both at once — pausing must not
+    // make a smoky reading look clean.
+    root.setProperty(
+      "--accent",
+      pm25 && !stale ? bandColor(pm25.value) : "var(--mist)"
+    );
+
+    // Upload state is carried by the chrome instead: held-blue, deliberately
+    // outside the AQI scale so it can never be read as an air-quality value.
+    document.body.classList.toggle("paused", view.paused);
+
+    const upload = view.status && view.status.last_upload;
+
+    if (view.paused) {
+      $("verb").textContent = "Not uploading";
+      $("verb-note").textContent = "Readings stay local. AQICN keeps the last value it got.";
+    } else {
+      $("verb").textContent = "Uploading";
+      $("verb-note").innerHTML = upload && upload.at
+        ? "Last sent " + ago(Math.round(serverNow() - upload.at)) + "."
+        : "Nothing sent yet.";
+    }
+
+    $("controls-run").hidden = view.paused;
+    $("controls-paused").hidden = !view.paused;
+    $("remaining").textContent =
+      clock(Math.round(view.paused_until - serverNow()));
+
+    $("station").textContent = (view.status && view.status.station_id) || "—";
+
+    $("upload-when").textContent = upload && upload.at
+      ? new Date(upload.at * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "never";
+
+    const dl = $("upload-readings");
+    dl.replaceChildren();
+    for (const r of (upload && upload.readings) || []) {
+      const dt = document.createElement("dt");
+      dt.textContent = r.specie;
+      const dd = document.createElement("dd");
+      dd.textContent = fmt(r.value, 1);
+      dl.append(dt, dd);
+    }
+
+    const failed = upload && upload.ok === false;
+    $("upload-error").hidden = !failed;
+    if (failed) $("upload-error").textContent = upload.error || "Upload failed.";
+  }
+
+  async function refresh() {
+    try {
+      const res = await fetch("/api/state", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      view = await res.json();
+      fetchedAt = performance.now();
+      $("offline").hidden = true;
+    } catch (err) {
+      $("offline").hidden = false;
+      return;
+    }
+    render();
+  }
+
+  async function send(path, body) {
+    try {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      view = await res.json();
+      fetchedAt = performance.now();
+      $("offline").hidden = true;
+      render();
+    } catch (err) {
+      $("offline").hidden = false;
+    }
+  }
+
+  for (const button of document.querySelectorAll("[data-seconds], [data-tonight]")) {
+    button.addEventListener("click", () => {
+      const seconds = button.dataset.tonight
+        ? untilMidnight()
+        : Number(button.dataset.seconds);
+      send("/api/pause", { seconds, reason: "campfire" });
+    });
+  }
+
+  $("resume").addEventListener("click", () => send("/api/resume", {}));
+
+  // Phones throttle timers in backgrounded tabs, so coming back to an already
+  // open tab would otherwise show whatever was on screen when it was hidden.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refresh();
+  });
+
+  refresh();
+  setInterval(refresh, POLL_MS);
+  setInterval(render, 1000);   // keeps ages and the countdown moving
+})();
+</script>
+</body>
+</html>
