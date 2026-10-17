@@ -287,7 +287,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisSoftMax": 5,
+            "axisSoftMax": 2.0,
             "axisSoftMin": 0,
             "barAlignment": 0,
             "drawStyle": "line",
@@ -908,6 +908,6 @@
   "timezone": "",
   "title": "Electrical energy",
   "uid": "d4a21ddd-1eb6-4080-b000-36d50e528ef1",
-  "version": 12,
+  "version": 13,
   "weekStart": ""
 }
