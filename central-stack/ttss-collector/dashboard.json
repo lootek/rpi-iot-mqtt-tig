@@ -82,6 +82,11 @@
         {
           "columns": [
             {
+              "selector": "line",
+              "text": "line",
+              "type": "string"
+            },
+            {
               "selector": "countdown_min",
               "text": "countdown_min",
               "type": "number"
@@ -177,6 +182,11 @@
       "targets": [
         {
           "columns": [
+            {
+              "selector": "line",
+              "text": "line",
+              "type": "string"
+            },
             {
               "selector": "countdown_min",
               "text": "countdown_min",

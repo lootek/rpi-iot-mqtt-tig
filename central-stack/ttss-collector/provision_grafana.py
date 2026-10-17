@@ -74,16 +74,36 @@ def ensure_datasource():
         code, body = call("POST", "/api/datasources", DATASOURCE)
         expect("create datasource", code, body, ok=(200, 201))
         print(f"datasource ztp-infinity created (HTTP {code})")
-        return
-    expect("lookup datasource", code, body)
-    current = json.loads(body).get("jsonData") or {}
-    if current.get("allowedHosts") == DATASOURCE["jsonData"]["allowedHosts"]:
-        print("datasource ztp-infinity already present, allowedHosts up to date")
-        return
-    # Repair older creates that predate the allowedHosts allowlist.
-    code, body = call("PUT", "/api/datasources/uid/ztp-infinity", DATASOURCE)
-    expect("update datasource", code, body)
-    print(f"datasource ztp-infinity updated with allowedHosts (HTTP {code})")
+    else:
+        expect("lookup datasource", code, body)
+        current = json.loads(body).get("jsonData") or {}
+        if current.get("allowedHosts") == DATASOURCE["jsonData"]["allowedHosts"]:
+            print("datasource ztp-infinity already present, allowedHosts up to date")
+        else:
+            # Repair older creates that predate the allowedHosts allowlist.
+            code, body = call("PUT", "/api/datasources/uid/ztp-infinity", DATASOURCE)
+            expect("update datasource", code, body)
+            print(f"datasource ztp-infinity updated with allowedHosts (HTTP {code})")
+    verify_allowed_hosts()
+
+
+def verify_allowed_hosts():
+    """Post-write assertion: re-read the datasource and confirm Grafana kept
+    the allowedHosts allowlist. A plugin or Grafana upgrade that drops or
+    ignores the key would leave the datasource able to fetch any URL, so
+    fail loudly instead of continuing unrestricted."""
+    code, body = call("GET", "/api/datasources/uid/ztp-infinity")
+    expect("verify datasource", code, body)
+    allowed = (json.loads(body).get("jsonData") or {}).get("allowedHosts")
+    if allowed != DATASOURCE["jsonData"]["allowedHosts"]:
+        print(f"allowedHosts VERIFICATION FAILED: expected "
+              f"{DATASOURCE['jsonData']['allowedHosts']!r}, got {allowed!r} -- "
+              "Grafana/plugin dropped or ignored the allowlist; the datasource "
+              "would be UNRESTRICTED. Fix before provisioning dashboards.",
+              file=sys.stderr)
+        sys.exit(1)
+    print("allowedHosts verified: datasource restricted to "
+          f"{DATASOURCE['jsonData']['allowedHosts'][0]}")
 
 
 def ensure_folder():
