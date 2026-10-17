@@ -6679,6 +6679,131 @@
       ],
       "title": "Error rate",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 228
+      },
+      "id": 62058,
+      "panels": [],
+      "title": "WiFi",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": 600000
+          },
+          "max": -30,
+          "min": -95,
+          "unit": "dBm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 229
+      },
+      "id": 62059,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "$tag_host $tag_interface",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
+          },
+          "query": "SELECT mean(\"level_dbm\") FROM \"wifi_link\" WHERE \"host\" =~ /^$server$/ AND $timeFilter GROUP BY time($interval), \"host\", \"interface\" fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "WiFi link level (connected network)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": 600000
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 229
+      },
+      "id": 62060,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "$tag_host $tag_ssid",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
+          },
+          "query": "SELECT mean(\"signal_pct\") FROM \"wifi_scan\" WHERE \"host\" =~ /^$server$/ AND $timeFilter GROUP BY time($interval), \"host\", \"ssid\" fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "WiFi signal (known networks)",
+      "type": "timeseries"
     }
   ],
   "preload": false,
@@ -6871,6 +6996,6 @@
   "timezone": "browser",
   "title": "Nodes",
   "uid": "000000127",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }
