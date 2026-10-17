@@ -1,0 +1,7 @@
+[Unit]
+Description=Export signal strength of known wifi networks for telegraf
+After=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wifi-signal.sh
