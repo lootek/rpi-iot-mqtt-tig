@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  # ZTP Krakow GTFS-RT -> JSON for the Grafana Infinity datasource.
+  # Single-purpose instance: stop 7689 (Brzoskwinia Kamyk 02), lines 258/298
+  # towards Krakow Bronowice. The opposite direction (stop 7687, Nielepice)
+  # is a copy of this file with different env values and a different port.
+  ttss-collector:
+    image: ttss-collector:latest
+    build:
+      context: ./ttss-collector
+      dockerfile: Dockerfile
+    container_name: ttss-collector
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - STOP_ID=7689
+      - STOP_NAME=Brzoskwinia Kamyk 02
+      - ROUTES=258,298
+      - DIRECTION=Kraków Bronowice
+      - FEED_BASE=https://gtfs.ztp.krakow.pl
+      - POLL_INTERVAL=15
+      - PORT=8090
