@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "c431b1b5-3391-4817-b243-535b5ab30e1a"
+        "uid": "fecz574dkbda8b"
       },
       "fieldConfig": {
         "defaults": {
@@ -83,7 +83,128 @@
           },
           "unit": "amp"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 0"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 4"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 5"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 6"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 7"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 8"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 9"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "10 · reference (no conductor)"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 11,
@@ -106,9 +227,10 @@
       },
       "targets": [
         {
+          "alias": "ch $m",
           "datasource": {
             "type": "influxdb",
-            "uid": "c431b1b5-3391-4817-b243-535b5ab30e1a"
+            "uid": "fecz574dkbda8b"
           },
           "groupBy": [
             {
@@ -124,10 +246,9 @@
               "type": "fill"
             }
           ],
-          "measurement": "/sensors/attic/dht11/temperature",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"value\" FROM \"/sensors/energy/sct013/current\"",
+          "query": "SELECT mean(\"current\") FROM /^[0-9]$/ WHERE \"location\" = 'sct013' AND $timeFilter GROUP BY time($__interval), \"location\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -149,26 +270,12 @@
         }
       ],
       "title": "Current",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "destinationType": "number",
-                "targetField": "Value"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "c431b1b5-3391-4817-b243-535b5ab30e1a"
+        "uid": "fecz574dkbda8b"
       },
       "fieldConfig": {
         "defaults": {
@@ -222,9 +329,130 @@
               }
             ]
           },
-          "unit": "watt"
+          "unit": "kwatt"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 0"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 4"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 5"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 6"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 7"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 8"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 9"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "10 · reference (no conductor)"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 11,
@@ -247,9 +475,10 @@
       },
       "targets": [
         {
+          "alias": "ch $m",
           "datasource": {
             "type": "influxdb",
-            "uid": "c431b1b5-3391-4817-b243-535b5ab30e1a"
+            "uid": "fecz574dkbda8b"
           },
           "groupBy": [
             {
@@ -266,10 +495,9 @@
             }
           ],
           "hide": false,
-          "measurement": "/sensors/attic/dht11/temperature",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"value\" FROM \"/sensors/energy/sct013/power\"",
+          "query": "SELECT mean(\"power\") FROM /^[0-9]$/ WHERE \"location\" = 'sct013' AND $timeFilter GROUP BY time($__interval), \"location\" fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -291,20 +519,6 @@
         }
       ],
       "title": "Power",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "destinationType": "number",
-                "targetField": "Value"
-              }
-            ],
-            "fields": {}
-          }
-        }
-      ],
       "type": "timeseries"
     }
   ],
@@ -323,6 +537,6 @@
   "timezone": "",
   "title": "Electrical energy",
   "uid": "d4a21ddd-1eb6-4080-b000-36d50e528ef1",
-  "version": 4,
+  "version": 8,
   "weekStart": ""
 }
