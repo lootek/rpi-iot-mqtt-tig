@@ -520,6 +520,431 @@
       ],
       "title": "Power",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 0,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "min": 0,
+          "unit": "kwatth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 0"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 4"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 5"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 6"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 7"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 8"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 9"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "10 · reference (no conductor)"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "ch $m",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "query": "SELECT cumulative_sum(sum(\"energy\")) FROM /^[0-9]$/ WHERE \"location\" = 'sct013' AND $timeFilter GROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Energy (cumulative over range)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 3,
+          "min": 0,
+          "unit": "kwatth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 0"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 4"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 5"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 6"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 7"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 8"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 9"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "10 · reference (no conductor)"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 14,
+        "x": 0,
+        "y": 32
+      },
+      "id": 4,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "alias": "ch $m",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "query": "SELECT sum(\"energy\") FROM /^[0-9]$/ WHERE \"location\" = 'sct013' AND $timeFilter",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Energy by sensor (over range)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "fecz574dkbda8b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 10,
+        "x": 14,
+        "y": 32
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/^total$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "alias": "ch $m",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "fecz574dkbda8b"
+          },
+          "query": "SELECT sum(\"energy\") FROM /^[0-8]$/ WHERE \"location\" = 'sct013' AND $timeFilter GROUP BY time($__interval) fill(0)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Total consumption, sensors 1-9 (over range)",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "total",
+            "mode": "reduceRow",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
     }
   ],
   "refresh": "1h",
@@ -537,6 +962,6 @@
   "timezone": "",
   "title": "Electrical energy",
   "uid": "d4a21ddd-1eb6-4080-b000-36d50e528ef1",
-  "version": 8,
+  "version": 9,
   "weekStart": ""
 }
