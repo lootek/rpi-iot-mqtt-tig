@@ -28,6 +28,7 @@ F_HOST = "a129b860-4707-4296-8eaa-0dee5978b4db"       # folder "Host monitoring"
 GRAFANA_BASE = "http://192.168.10.18:3000"
 DASH_ROOM = "aem53k0pia29sd"   # Room conditions
 DASH_NODES = "000000127"       # Nodes
+DASH_ELECTRICAL = "d4a21ddd-1eb6-4080-b000-36d50e528ef1"   # Electrical energy
 
 MIN, HOUR = 60, 3600
 
@@ -644,6 +645,82 @@ group(F_HOST, "host-resources", 5 * MIN, [
             "or Alqualonde may be stronger than the connected one."
         ),
         domain="host", dashboard=DASH_NODES,
+    ),
+])
+
+
+# ===========================================================================
+# Energy monitoring -- rohan's 10 SCT013 clamps (ADS1263 HAT)
+# ===========================================================================
+# clamp number (sticker on the clamp, K1..K10) -> software channel, which is the
+# measurement name in the mqtt DB (tag location=sct013, fields current / power).
+# Mapping verified with a heater test on 2026-10-17; K10 is the reference clamp
+# sitting on nothing. See tablica.md for what each clamp measures.
+SCT013_CLAMPS = {1: 4, 2: 0, 3: 2, 4: 6, 5: 1, 6: 8, 7: 3, 8: 5, 9: 7, 10: 9}
+
+# Per-conductor mean power above this, sustained, is far beyond normal use. A
+# genuine dead short trips the breaker/RCD within milliseconds and never gets
+# here, so this catches the slow failures: wet or damaged cables, heavy leakage,
+# overloaded feeds. Normal peaks are 3-4.5 kW (oven + kettle together).
+SCT013_SURGE_KW = 5.0
+# The noise floor of a connected clamp is ~0.01 A, never exactly 0, so a flat 0.0
+# means the clamp/ADC input is dead or disconnected, or rohan stopped publishing.
+SCT013_ZERO_A = 0.0005
+
+
+def sct013_rule(uid, title, field, agg, window, op_expr, limit, for_, severity,
+                summary, description, unit_fmt, no_data):
+    """One query + reduce per clamp, combined into a single any-clamp condition.
+
+    The series differ only by measurement name (no tag), and Grafana builds alert
+    labels from tags, so a per-clamp instance is not possible; instead the
+    description lists every clamp's value.
+    """
+    data = []
+    for k, ch in sorted(SCT013_CLAMPS.items()):
+        data.append(query(
+            f"Q{k}", DS_MQTT,
+            f'SELECT {agg}("{field}") FROM "{ch}" WHERE $timeFilter '
+            f"AND \"location\" = 'sct013'", window))
+    for k in sorted(SCT013_CLAMPS):
+        data.append(reduce(f"R{k}", f"Q{k}", "last"))
+    cond = " || ".join(f"($R{k} {op_expr} {limit})" for k in sorted(SCT013_CLAMPS))
+    data += [math("E", cond), threshold("F", "E", "gt", 0)]
+    values = "\n".join(
+        f'K{k} (ch{SCT013_CLAMPS[k]}): {{{{ printf "{unit_fmt}" $values.R{k}.Value }}}}'
+        for k in sorted(SCT013_CLAMPS))
+    return rule(uid, title, F_MQTT, "energy-monitor", data, "F", for_, severity,
+                summary, description.replace("{values}", values),
+                domain="energy", no_data=no_data, dashboard=DASH_ELECTRICAL)
+
+
+group(F_MQTT, "energy-monitor", 1 * MIN, [
+    sct013_rule(
+        "energy-clamp-surge", "Clamp current surge", "power", "mean", 2 * MIN,
+        ">", SCT013_SURGE_KW, "2m", "warning",
+        summary="Electrical feed above %g kW (2-minute mean)" % SCT013_SURGE_KW,
+        description=(
+            "At least one SCT013 clamp reads more than %g kW (2-minute mean), sustained 2m.\n\n"
+            "{values}\n\n"
+            "Wet or damaged cables, leakage or an overloaded feed look like this. A\n"
+            "hard short would have tripped the breaker instead. Normal peaks are\n"
+            "3-4.5 kW (oven + kettle), so check what is running before assuming a fault.\n"
+            "Clamp numbers match the labels on the board: see tablica.md for the circuits."
+            % SCT013_SURGE_KW),
+        unit_fmt="%.2f kW", no_data="OK",
+    ),
+    sct013_rule(
+        "energy-clamp-zero", "Clamp reads zero", "current", "max", 10 * MIN,
+        "<", SCT013_ZERO_A, "5m", "warning",
+        summary="An SCT013 clamp has read exactly 0 A for 10 minutes (or sent nothing)",
+        description=(
+            "At least one clamp's maximum current over the last 10 minutes is 0.0 A\n"
+            "(or there is no data at all), sustained 5m.\n\n"
+            "{values}\n\n"
+            "A connected clamp always shows ~0.01 A of noise, never exactly 0. Check\n"
+            "the clamp's jack on the AD HAT, and `docker ps` / `docker logs iot-sct013`\n"
+            "on rohan. If every clamp is empty, rohan or the MQTT pipeline is down."),
+        unit_fmt="%.4f A", no_data="Alerting",
     ),
 ])
 

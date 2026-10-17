@@ -1,6 +1,6 @@
 # Alerting for the RPi/IoT fleet
 
-24 Grafana alert rules covering the MQTT sensor estate, the pipeline it depends
+26 Grafana alert rules covering the MQTT sensor estate, the pipeline it depends
 on, and host health. Source of truth is `catalog.py`; `apply.py` pushes it to
 Grafana on lothlorien.
 
