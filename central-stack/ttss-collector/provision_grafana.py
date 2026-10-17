@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Provision the ZTP Infinity datasource, the Transport folder and the
-Kamyk -> Bronowice dashboard into Grafana on lothlorien.
+"""Provision the ZTP Infinity datasource, the Misc folder and the
+MPK departures dashboard into Grafana on lothlorien.
 
 stdlib only (urllib) so it runs from any laptop without a repo venv:
 
@@ -30,7 +30,7 @@ DATASOURCE = {
     "jsonData": {"auth": False, "defaultURL": "http://127.0.0.1:8090"},
 }
 
-FOLDER_TITLE = "Transport"
+FOLDER_TITLE = "Misc"
 
 
 def token():

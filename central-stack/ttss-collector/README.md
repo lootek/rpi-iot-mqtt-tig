@@ -57,8 +57,8 @@ python3 provision_grafana.py     # from the Mac; token in ~/.secrets/grafana
 
 Ensures the `ztp-infinity` Infinity datasource (default URL
 `http://127.0.0.1:8090` — Grafana runs host-network on the same Pi), the
-`Transport` folder and the `kamyk-bronowice` dashboard. The nightly
-dashboards export will also snapshot it into `central-stack/dashboards/`.
+`Misc` folder and the `mpk` dashboard. The nightly dashboards export will
+also snapshot it into `central-stack/dashboards/Misc/`.
 
 ## Future
 
