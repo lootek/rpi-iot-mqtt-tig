@@ -24,6 +24,10 @@ max_energy_interval = 60.0
 ampers_volt_ratio = 30.0
 voltage = 230.0
 power_factor = 0.9
+# Per-channel correction for clamps that read off. Channel 4 reads ~2.05x too low
+# (the same 1.2 kW heater gives 2.6 A there and 5.3 A on every other channel).
+amps_scale = [1.0] * inputs_count
+amps_scale[4] = 2.05
 
 # MQTT
 port = 1883
@@ -99,6 +103,7 @@ def measure(client, ads):
             else:
                 irms = 0.0
 
+            irms *= amps_scale[i]
             power = (irms * voltage * power_factor) / 1000.0
             energy = (power * interval) / 3600.0
 
