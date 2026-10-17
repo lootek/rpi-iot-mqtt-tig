@@ -16,8 +16,22 @@ curl 127.0.0.1:8090/health       # feed ages, staleness, departure count
 ```
 
 `/departures` rows: `line, headsign, scheduled, expected, delay_min,
-countdown_min, stops_away, vehicle, status` (status `SKIPPED` = cancelled),
-sorted by expected departure, future-ish only.
+countdown_min, stops_away, vehicle, status, source` (status `SKIPPED` =
+cancelled), sorted by expected departure, future-ish only.
+
+## Timetable-backed board
+
+GTFS-RT only carries trips with active vehicles, so a pure live view goes
+blank roughly 21:00-05:00. `/departures` therefore always returns the next
+`TIMETABLE_ROWS` (default 12) departures from the static schedule — ZTP
+trip_ids embed the service date as their first 8 chars, which pins each trip
+to an absolute epoch — and overlays live predictions when a trip is currently
+tracked. Rows carry `source: "timetable"` (status `TIMETABLE`, `expected`/
+`delay_min`/`vehicle` null, countdown from the schedule) or `source: "live"`.
+
+The daily zip covers only its own service date, so once the cached horizon
+runs out (end of service) the static refresher switches from the 6 h cadence
+to `STATIC_FAST_REFRESH_S` until the next day's feed is picked up.
 
 ## The delay is computed, not read
 
@@ -40,6 +54,8 @@ Fail-open: on a fetch error the last good RT snapshot is served for up to
 | `DIRECTION` | `Kraków Bronowice` | cosmetic |
 | `FEED_BASE` | `https://gtfs.ztp.krakow.pl` | |
 | `POLL_INTERVAL` | `15` | seconds |
+| `TIMETABLE_ROWS` | `12` | next-N scheduled departures on the board |
+| `STATIC_FAST_REFRESH_S` | `600` | static poll when the day's trips run out |
 | `PORT` | `8090` | |
 
 ## Deploy (lothlorien)

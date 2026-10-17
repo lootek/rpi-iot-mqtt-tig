@@ -32,8 +32,10 @@ ROUTES = {r.strip() for r in os.environ.get("ROUTES", "258,298").split(",") if r
 DIRECTION = os.environ.get("DIRECTION", "Kraków Bronowice")
 FEED_BASE = os.environ.get("FEED_BASE", "https://gtfs.ztp.krakow.pl").rstrip("/")
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "15"))
+TIMETABLE_ROWS = int(os.environ.get("TIMETABLE_ROWS", "12"))
 PORT = int(os.environ.get("PORT", "8090"))
 STATIC_REFRESH_S = 6 * 3600
+STATIC_FAST_REFRESH_S = int(os.environ.get("STATIC_FAST_REFRESH_S", "600"))
 RT_MAX_AGE_S = 600
 TZ = ZoneInfo("Europe/Warsaw")
 
@@ -74,6 +76,23 @@ def service_midnight(date_str):
                     tzinfo=TZ).timestamp()
 
 
+def trip_sched_epoch(trip_id, sched_dep):
+    """Absolute scheduled departure epoch for a static trip, or None.
+
+    ZTP trip_ids embed the service date as the first 8 chars (e.g.
+    "20261017_2_129426431_13"), so the timetable view can place a trip in
+    time without the RT feed. Trips without the date prefix stay in the
+    cache (still useful for live delay math) but are skipped on the board.
+    """
+    prefix = trip_id[:8]
+    if not (len(prefix) == 8 and prefix.isdigit()):
+        return None
+    try:
+        return service_midnight(prefix) + sched_dep
+    except ValueError:  # digits, but not a real date
+        return None
+
+
 def parse_static_zip(data):
     """Keep only the stop_times rows calling at STOP_ID, joined with trips.txt."""
     calls = {}
@@ -96,6 +115,7 @@ def parse_static_zip(data):
                         "headsign": row.get("trip_headsign") or None,
                         "direction_id": row.get("direction_id"),
                         "sched_dep": call["sched_dep"],
+                        "sched_epoch": trip_sched_epoch(row["trip_id"], call["sched_dep"]),
                         "stop_sequence": call["stop_sequence"],
                         "stop_headsign": call["stop_headsign"],
                     }
@@ -124,6 +144,22 @@ def refresh_static():
     log(f"static: {len(trips)} scheduled trips call at stop {STOP_ID}")
 
 
+def static_sleep_s():
+    """6 h between static refreshes, except when the cached timetable is
+    about to run dry.
+
+    The daily zip only covers its own service date, so near the end of
+    service the next regular tick could land hours after ZTP publishes the
+    next day's feed — poll every STATIC_FAST_REFRESH_S instead so the board
+    refills quickly (conditional GETs, so mostly 304s).
+    """
+    now = time.time()
+    with STATE.lock:
+        horizon = max((t["sched_epoch"] for t in STATE.trips.values()
+                       if t["route"] in ROUTES and t["sched_epoch"]), default=0.0)
+    return STATIC_REFRESH_S if horizon >= now + STATIC_REFRESH_S else STATIC_FAST_REFRESH_S
+
+
 def static_refresher():
     while True:
         started = time.time()
@@ -131,7 +167,7 @@ def static_refresher():
             refresh_static()
         except Exception as exc:
             log(f"static refresh failed, keeping old cache: {exc}")
-        time.sleep(STATIC_REFRESH_S)
+        time.sleep(static_sleep_s())
 
 
 # -------------------------------------------------------------------- real time
@@ -215,6 +251,56 @@ def build_departures(tu_msg, vp_msg, now):
     return [row for _, row in rows]
 
 
+def build_board(now, live_usable):
+    """Next N scheduled departures from the static cache, overlaid with live
+    RT rows.
+
+    The RT feed only carries trips with active vehicles, which leaves the
+    board empty roughly 21:00-05:00; the timetable view fills those hours.
+    Every row gets a "source": "live" when the trip is currently tracked,
+    "timetable" when it is schedule-only (expected/delay/vehicle unknown).
+    """
+    live_rows = [dict(r) for r in (STATE.departures if live_usable else [])]
+    for row in live_rows:
+        row["source"] = "live"
+    live_by_trip = {r["trip_id"]: r for r in live_rows}
+
+    window = sorted(
+        (t["sched_epoch"], trip_id) for trip_id, t in STATE.trips.items()
+        if t["route"] in ROUTES and t["sched_epoch"] is not None
+        and t["sched_epoch"] >= now - 120
+    )[:TIMETABLE_ROWS]
+
+    board = []
+    for epoch, trip_id in window:
+        live = live_by_trip.get(trip_id)
+        if live is not None:
+            board.append(live)
+            continue
+        static = STATE.trips[trip_id]
+        board.append({
+            "trip_id": trip_id,
+            "line": static["route"],
+            "headsign": static["headsign"] or static["stop_headsign"],
+            "scheduled": datetime.fromtimestamp(epoch, TZ).strftime("%H:%M"),
+            "expected": None,
+            "delay_min": None,
+            "countdown_min": round((epoch - now) / 60, 1),
+            "stops_away": None,
+            "vehicle": None,
+            "status": "TIMETABLE",
+            "source": "timetable",
+        })
+
+    # Live trips outside the static window (unscheduled, or beyond the N-row
+    # horizon) keep their place on the board.
+    in_window = {trip_id for _, trip_id in window}
+    board.extend(r for r in live_rows if r["trip_id"] not in in_window)
+
+    board.sort(key=lambda r: r["countdown_min"])
+    return board
+
+
 def build_alerts(sa_msg, now):
     out = []
     for e in sa_msg.entity:
@@ -295,7 +381,7 @@ class Handler(BaseHTTPRequestHandler):
                     "generated_at": STATE.generated_at,
                     "feed_age_s": round(age, 1) if age is not None else None,
                     "stale": stale,
-                    "departures": STATE.departures if usable else [],
+                    "departures": build_board(now, usable),
                 }
             elif path == "/alerts":
                 payload = {"alerts": STATE.alerts if usable else []}
@@ -307,6 +393,7 @@ class Handler(BaseHTTPRequestHandler):
                     "feed_age_s": round(age, 1) if age is not None else None,
                     "stale": stale,
                     "departures_count": len(STATE.departures) if usable else 0,
+                    "timetable_rows": TIMETABLE_ROWS,
                 }
             else:
                 self.send_json(404, {"error": "not found"})

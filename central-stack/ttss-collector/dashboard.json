@@ -497,6 +497,11 @@
                         "color": "red",
                         "index": 0,
                         "text": "CANCELLED"
+                      },
+                      "TIMETABLE": {
+                        "color": "text",
+                        "index": 1,
+                        "text": "rozkład"
                       }
                     },
                     "type": "value"
