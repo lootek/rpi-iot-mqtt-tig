@@ -621,6 +621,30 @@ group(F_HOST, "host-resources", 5 * MIN, [
         ),
         domain="host", dashboard=DASH_NODES,
     ),
+    # wifi_link is written by host-monitoring/wifi/wifi-signal.sh (rohan today);
+    # hosts without wifi never report it, so no-data must stay OK.
+    # rohan sits in a closed metal enclosure: about -50 dBm with the lid open and
+    # -65 dBm closed, so -75 leaves ~10 dB of headroom before drops are likely.
+    rule(
+        "host-wifi-weak", "Wi-Fi link weak", F_HOST, "host-resources",
+        [query("A", DS_TELEGRAF,
+               f'SELECT mean("level_dbm") FROM "wifi_link" WHERE $timeFilter '
+               f'AND "host" =~ /{rx(HOSTS)}/ GROUP BY "host"', 10 * MIN),
+         reduce("B", "A", "last"), threshold("C", "B", "lt", -75)],
+        "C", "10m", "warning",
+        summary='{{ $labels.host }}: Wi-Fi {{ printf "%.0f" $values.B.Value }} dBm (limit -75 dBm)',
+        description=(
+            "Host:      {{ $labels.host }}\n"
+            'Measured:  {{ printf "%.0f" $values.B.Value }} dBm (10-minute mean link level)\n'
+            "Threshold: below -75 dBm sustained for 10m\n\n"
+            "rohan sits in a metal enclosure and normally reads about -65 dBm with the\n"
+            "lid closed. Below -75 dBm packet loss and reconnects become likely.\n"
+            "Action: open or reposition the lid, move the antenna out of the box, or\n"
+            "compare the known networks on the Nodes dashboard (WiFi row) -- Harlond\n"
+            "or Alqualonde may be stronger than the connected one."
+        ),
+        domain="host", dashboard=DASH_NODES,
+    ),
 ])
 
 
