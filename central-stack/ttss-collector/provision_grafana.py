@@ -27,7 +27,10 @@ DATASOURCE = {
     "type": "yesoreyeram-infinity-datasource",
     "uid": "ztp-infinity",
     "access": "proxy",
-    "jsonData": {"auth": False, "defaultURL": "http://127.0.0.1:8090"},
+    # Full URL incl. scheme and port: the plugin checks both a URL prefix
+    # match and the hostname, so the port must be part of the entry.
+    "jsonData": {"auth": False, "defaultURL": "http://127.0.0.1:8090",
+                 "allowedHosts": ["http://127.0.0.1:8090"]},
 }
 
 FOLDER_TITLE = "Misc"
@@ -69,11 +72,18 @@ def ensure_datasource():
     code, body = call("GET", "/api/datasources/uid/ztp-infinity")
     if code == 404:
         code, body = call("POST", "/api/datasources", DATASOURCE)
-        expect("create datasource", code, body)
+        expect("create datasource", code, body, ok=(200, 201))
         print(f"datasource ztp-infinity created (HTTP {code})")
-    else:
-        expect("lookup datasource", code, body)
-        print("datasource ztp-infinity already present")
+        return
+    expect("lookup datasource", code, body)
+    current = json.loads(body).get("jsonData") or {}
+    if current.get("allowedHosts") == DATASOURCE["jsonData"]["allowedHosts"]:
+        print("datasource ztp-infinity already present, allowedHosts up to date")
+        return
+    # Repair older creates that predate the allowedHosts allowlist.
+    code, body = call("PUT", "/api/datasources/uid/ztp-infinity", DATASOURCE)
+    expect("update datasource", code, body)
+    print(f"datasource ztp-infinity updated with allowedHosts (HTTP {code})")
 
 
 def ensure_folder():
