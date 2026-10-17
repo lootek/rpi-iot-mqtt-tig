@@ -4,7 +4,7 @@ services:
   iot-sct013:
     image: iot-sct013:latest
     build:
-      dockerfile: Dockerfile.sct013
+      dockerfile: Dockerfile
       context: .
     container_name: iot-sct013
     restart: unless-stopped
