@@ -19,7 +19,8 @@ samples_num = 1000
 adc_rate = "ADS1263_7200SPS"
 ref_voltage = 2.5
 inputs_count = 10
-time_elapsed = 0
+# Cap on the time a power reading is assumed to hold (e.g. after a stall), in seconds
+max_energy_interval = 60.0
 ampers_volt_ratio = 30.0
 voltage = 230.0
 power_factor = 0.9
@@ -59,6 +60,10 @@ def publish(client, topic, msg):
 
 
 def measure(client, ads):
+    # when each channel was last accounted for, so energy covers the whole time
+    # between two readings of that channel and not just the sampling window
+    last_seen = {}
+
     while True:
         if debug:
             print("Starting measurement")
@@ -82,7 +87,9 @@ def measure(client, ads):
                 amps = (val / 0x7FFFFFFF) * ref_voltage * ampers_volt_ratio
                 samples.append(amps)
 
-            time_elapsed = time() - start_time
+            now = time()
+            interval = min(now - last_seen.get(i, start_time), max_energy_interval)
+            last_seen[i] = now
 
             if len(samples) > 0:
                 dc_offset = sum(samples) / len(samples)
@@ -93,7 +100,7 @@ def measure(client, ads):
                 irms = 0.0
 
             power = (irms * voltage * power_factor) / 1000.0
-            energy = (power * time_elapsed) / 3600.0
+            energy = (power * interval) / 3600.0
 
             print("Ch{}: Irms: {:.2f} A, Power: {:.3f} kW".format(i, irms, power))
             publish(client, "/sensors/sct013/{}/current".format(i), irms)
