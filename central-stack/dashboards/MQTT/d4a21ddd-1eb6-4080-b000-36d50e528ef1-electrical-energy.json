@@ -531,181 +531,6 @@
           "color": {
             "mode": "palette-classic"
           },
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1,
-            "showPoints": "never"
-          },
-          "min": 0,
-          "unit": "kwatth"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 0"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, piętro pokoje, osw. piwnica/WC, osw. piętro + HEX)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 1"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K5 · P3 faza 3 (łazienka sypialnia/HEX, garaż 3×400, osw. jadalnia)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 2"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K3 · P2 faza 3 (kuchnia 1+4, piętro sypialnia/gościnny, osw. garaż, osw. piętro)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 3"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, jadalnia, strych)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 4"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw. salon)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 5"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K8 · P4 faza 1 (altanka, osw. zewn., brama, studnia)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 6"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K4 · P3 faza 1 (łazienka piętro: pralka, suszarka; garaż 3×400, osw. schody+holl)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 7"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K9 · P4 faza 2 (piec, bojler, rozdzielacze CO)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 8"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K6 · P3 faza 2 (hydrofor, gn garaż+holl, kotłownia, garaż 3×400)"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "ch 9"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "K10 · reference (no conductor)"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 22
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "alias": "ch $m",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "fecz574dkbda8b"
-          },
-          "query": "SELECT cumulative_sum(sum(\"energy\")) FROM /^[0-9]$/ WHERE \"location\" = 'sct013' AND $timeFilter GROUP BY time($__interval) fill(0)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "title": "Energy (cumulative over range)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "fecz574dkbda8b"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
           "decimals": 3,
           "min": 0,
           "unit": "kwatth"
@@ -837,7 +662,7 @@
         "h": 10,
         "w": 14,
         "x": 0,
-        "y": 32
+        "y": 22
       },
       "id": 4,
       "options": {
@@ -1016,7 +841,7 @@
         "h": 10,
         "w": 10,
         "x": 14,
-        "y": 32
+        "y": 22
       },
       "id": 5,
       "options": {
@@ -1083,6 +908,6 @@
   "timezone": "",
   "title": "Electrical energy",
   "uid": "d4a21ddd-1eb6-4080-b000-36d50e528ef1",
-  "version": 11,
+  "version": 12,
   "weekStart": ""
 }
