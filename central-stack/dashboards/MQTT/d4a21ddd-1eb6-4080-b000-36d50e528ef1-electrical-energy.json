@@ -92,7 +92,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
               }
             ]
           },
@@ -104,7 +104,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+                "value": "K5 · P3 faza 3 (lazienka sypialnia/HEX, garaz 3x400, osw jadalnia)"
               }
             ]
           },
@@ -116,7 +116,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+                "value": "K3 · P2 faza 3 (kuchnia 1+4, pietro sypialnia/goscinny, osw garaz, osw pietro)"
               }
             ]
           },
@@ -128,7 +128,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, strych)"
               }
             ]
           },
@@ -140,7 +140,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw salon)"
               }
             ]
           },
@@ -152,7 +152,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+                "value": "K8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
               }
             ]
           },
@@ -164,7 +164,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+                "value": "K4 · P3 faza 1 (lazienka dzieci, garaz 3x400, osw schody+holl)"
               }
             ]
           },
@@ -176,7 +176,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+                "value": "K9 · P4 faza 2 (piec, rozdzielacze CO)"
               }
             ]
           },
@@ -188,7 +188,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+                "value": "K6 · P3 faza 2 (hydrofor, gn garaz+holl, kotlownia, garaz 3x400)"
               }
             ]
           },
@@ -200,7 +200,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "10 · reference (no conductor)"
+                "value": "K10 · reference (no conductor)"
               }
             ]
           }
@@ -340,7 +340,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
               }
             ]
           },
@@ -352,7 +352,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+                "value": "K5 · P3 faza 3 (lazienka sypialnia/HEX, garaz 3x400, osw jadalnia)"
               }
             ]
           },
@@ -364,7 +364,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+                "value": "K3 · P2 faza 3 (kuchnia 1+4, pietro sypialnia/goscinny, osw garaz, osw pietro)"
               }
             ]
           },
@@ -376,7 +376,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, strych)"
               }
             ]
           },
@@ -388,7 +388,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw salon)"
               }
             ]
           },
@@ -400,7 +400,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+                "value": "K8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
               }
             ]
           },
@@ -412,7 +412,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+                "value": "K4 · P3 faza 1 (lazienka dzieci, garaz 3x400, osw schody+holl)"
               }
             ]
           },
@@ -424,7 +424,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+                "value": "K9 · P4 faza 2 (piec, rozdzielacze CO)"
               }
             ]
           },
@@ -436,7 +436,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+                "value": "K6 · P3 faza 2 (hydrofor, gn garaz+holl, kotlownia, garaz 3x400)"
               }
             ]
           },
@@ -448,7 +448,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "10 · reference (no conductor)"
+                "value": "K10 · reference (no conductor)"
               }
             ]
           }
@@ -548,7 +548,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
               }
             ]
           },
@@ -560,7 +560,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+                "value": "K5 · P3 faza 3 (lazienka sypialnia/HEX, garaz 3x400, osw jadalnia)"
               }
             ]
           },
@@ -572,7 +572,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+                "value": "K3 · P2 faza 3 (kuchnia 1+4, pietro sypialnia/goscinny, osw garaz, osw pietro)"
               }
             ]
           },
@@ -584,7 +584,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, strych)"
               }
             ]
           },
@@ -596,7 +596,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw salon)"
               }
             ]
           },
@@ -608,7 +608,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+                "value": "K8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
               }
             ]
           },
@@ -620,7 +620,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+                "value": "K4 · P3 faza 1 (lazienka dzieci, garaz 3x400, osw schody+holl)"
               }
             ]
           },
@@ -632,7 +632,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+                "value": "K9 · P4 faza 2 (piec, rozdzielacze CO)"
               }
             ]
           },
@@ -644,7 +644,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+                "value": "K6 · P3 faza 2 (hydrofor, gn garaz+holl, kotlownia, garaz 3x400)"
               }
             ]
           },
@@ -656,7 +656,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "10 · reference (no conductor)"
+                "value": "K10 · reference (no conductor)"
               }
             ]
           }
@@ -719,7 +719,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "1 · P2 faza 1 (kuchnia 3x400, piekarnik, kuchnia 2, piwnica gn, osw salon)"
+                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
               }
             ]
           },
@@ -731,7 +731,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "2 · P2 faza 2 (kuchnia 3x400, zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+                "value": "K5 · P3 faza 3 (lazienka sypialnia/HEX, garaz 3x400, osw jadalnia)"
               }
             ]
           },
@@ -743,7 +743,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "3 · P2 faza 3 (kuchnia 3x400, kuchnia 1+4, pietro sypialnia, osw garaz, osw pietro)"
+                "value": "K3 · P2 faza 3 (kuchnia 1+4, pietro sypialnia/goscinny, osw garaz, osw pietro)"
               }
             ]
           },
@@ -755,7 +755,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "4 · P3 faza 1 (lazienka pietro, garaz 3x400, osw schody+holl)"
+                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, strych)"
               }
             ]
           },
@@ -767,7 +767,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "5 · P3 faza 3 (lazienka sypialnia, garaz 3x400, osw jadalnia)"
+                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw salon)"
               }
             ]
           },
@@ -779,7 +779,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "6 · P3 faza 2 (hydrofor, gn garaz+holl, garaz 3x400)"
+                "value": "K8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
               }
             ]
           },
@@ -791,7 +791,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "7 · P3 faza 3 RCD 14-15 (gabinet, alarm+internet, salon)"
+                "value": "K4 · P3 faza 1 (lazienka dzieci, garaz 3x400, osw schody+holl)"
               }
             ]
           },
@@ -803,7 +803,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+                "value": "K9 · P4 faza 2 (piec, rozdzielacze CO)"
               }
             ]
           },
@@ -815,7 +815,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "9 · P4 faza 2 (piec, rozdzielacze CO)"
+                "value": "K6 · P3 faza 2 (hydrofor, gn garaz+holl, kotlownia, garaz 3x400)"
               }
             ]
           },
@@ -827,7 +827,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "10 · reference (no conductor)"
+                "value": "K10 · reference (no conductor)"
               }
             ]
           }
@@ -889,7 +889,128 @@
           },
           "unit": "kwatth"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 0"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K2 · P2 faza 2 (zmywarka, kuchnia 3, pietro pokoje, osw piwnica/WC, osw pietro+HEX)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K5 · P3 faza 3 (lazienka sypialnia/HEX, garaz 3x400, osw jadalnia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K3 · P2 faza 3 (kuchnia 1+4, pietro sypialnia/goscinny, osw garaz, osw pietro)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K7 · P3 RCD 14-15 faza 3 (gabinet, alarm+internet, salon, strych)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 4"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K1 · P2 faza 1 (piekarnik, kuchnia 2, piwnica gn, osw salon)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 5"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K8 · P4 faza 1 (blaszany, osw zewn., brama, przepompownia)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 6"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K4 · P3 faza 1 (lazienka dzieci, garaz 3x400, osw schody+holl)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 7"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K9 · P4 faza 2 (piec, rozdzielacze CO)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 8"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K6 · P3 faza 2 (hydrofor, gn garaz+holl, kotlownia, garaz 3x400)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ch 9"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "K10 · reference (no conductor)"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
@@ -962,6 +1083,6 @@
   "timezone": "",
   "title": "Electrical energy",
   "uid": "d4a21ddd-1eb6-4080-b000-36d50e528ef1",
-  "version": 9,
+  "version": 10,
   "weekStart": ""
 }
