@@ -53,7 +53,8 @@ Fail-open: on a fetch error the last good RT snapshot is served for up to
 | `ROUTES` | `258,298` | comma list, filters everything |
 | `DIRECTION` | `Kraków Bronowice` | cosmetic |
 | `FEED_BASE` | `https://gtfs.ztp.krakow.pl` | |
-| `POLL_INTERVAL` | `15` | seconds |
+| `POLL_INTERVAL` | `20` | day-cadence seconds (04:30-00:30) |
+| `NIGHT_POLL_INTERVAL` | `300` | night-cadence seconds (00:30-04:30) |
 | `TIMETABLE_ROWS` | `12` | next-N scheduled departures on the board |
 | `STATIC_FAST_REFRESH_S` | `600` | static poll when the day's trips run out |
 | `PORT` | `8090` | |

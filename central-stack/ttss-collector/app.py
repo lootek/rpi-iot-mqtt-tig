@@ -31,7 +31,10 @@ STOP_NAME = os.environ.get("STOP_NAME", "Brzoskwinia Kamyk 02")
 ROUTES = {r.strip() for r in os.environ.get("ROUTES", "258,298").split(",") if r.strip()}
 DIRECTION = os.environ.get("DIRECTION", "Kraków Bronowice")
 FEED_BASE = os.environ.get("FEED_BASE", "https://gtfs.ztp.krakow.pl").rstrip("/")
-POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "15"))
+POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "20"))
+NIGHT_POLL_INTERVAL = int(os.environ.get("NIGHT_POLL_INTERVAL", "300"))
+DAY_START = datetime.strptime(os.environ.get("DAY_START", "04:30"), "%H:%M").time()
+DAY_END = datetime.strptime(os.environ.get("DAY_END", "00:30"), "%H:%M").time()
 TIMETABLE_ROWS = int(os.environ.get("TIMETABLE_ROWS", "12"))
 PORT = int(os.environ.get("PORT", "8090"))
 STATIC_REFRESH_S = 6 * 3600
@@ -339,6 +342,15 @@ def build_alerts(sa_msg, now):
     return out
 
 
+def rt_poll_interval():
+    """Day cadence; back off at night when no vehicles are out there anyway.
+    Day window spans midnight (04:30 .. 00:30 next day)."""
+    t = datetime.now(TZ).time()
+    if t >= DAY_START or t <= DAY_END:
+        return POLL_INTERVAL
+    return NIGHT_POLL_INTERVAL
+
+
 def rt_poller():
     while True:
         started = time.time()
@@ -358,7 +370,7 @@ def rt_poller():
             with STATE.lock:
                 STATE.rt_failed = True
             log(f"rt poll failed, serving last snapshot: {exc}")
-        time.sleep(max(1, POLL_INTERVAL - (time.time() - started)))
+        time.sleep(max(1, rt_poll_interval() - (time.time() - started)))
 
 
 # ----------------------------------------------------------------- HTTP server
@@ -418,7 +430,7 @@ def main():
     threading.Thread(target=rt_poller, daemon=True, name="rt").start()
     server = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     log(f"serving stop {STOP_ID} ({STOP_NAME}) lines {','.join(sorted(ROUTES))} "
-        f"on port {PORT}, polling every {POLL_INTERVAL}s")
+        f"on port {PORT}, polling every {POLL_INTERVAL}s day / {NIGHT_POLL_INTERVAL}s night")
     server.serve_forever()
 
 

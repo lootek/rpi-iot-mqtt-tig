@@ -20,5 +20,6 @@ services:
       - ROUTES=258,298
       - DIRECTION=Kraków Bronowice
       - FEED_BASE=https://gtfs.ztp.krakow.pl
-      - POLL_INTERVAL=15
+      - POLL_INTERVAL=20
+      - NIGHT_POLL_INTERVAL=300
       - PORT=8090
