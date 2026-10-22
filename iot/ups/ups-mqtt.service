@@ -1,0 +1,13 @@
+[Unit]
+Description=Publish NUT UPS readings to MQTT
+After=nut-server.service network-online.target
+Wants=network-online.target
+
+[Service]
+User=nut
+ExecStart=/usr/bin/python3 /usr/local/sbin/ups-mqtt.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
