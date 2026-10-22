@@ -33,6 +33,10 @@ SCD30_LOCATIONS = ["dining_room", "office"]     # CO2
 SPS30_LOCATIONS = ["patio"]                     # particulates
 WIFI_LOCATIONS = ["bathroom_tetris", "dining_room", "office"]
 
+# UPS units publishing to mqtt.ups. "attic" gets added here once shire's UPS is
+# connected -- listing it earlier would make ups-silent fire immediately.
+UPS_LOCATIONS = ["living_room"]
+
 # --- telegraf hosts ---------------------------------------------------------
 # rohan is deliberately absent: last metric 2026-06-23, so including it would
 # mean a permanently-firing rule. Re-add it here once it is back on the network.

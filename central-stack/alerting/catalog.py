@@ -14,7 +14,7 @@ import json
 import sys
 
 from rosters import (DHT22_ALL, DHT22_FREEZE_RISK, DHT22_INDOOR, EXPECTED_CONTAINERS,
-                     HOSTS, SCD30_LOCATIONS, SPS30_LOCATIONS, WIFI_LOCATIONS, rx)
+                     HOSTS, SCD30_LOCATIONS, SPS30_LOCATIONS, UPS_LOCATIONS, WIFI_LOCATIONS, rx)
 
 # --- environment ------------------------------------------------------------
 DS_MQTT = "fecz574dkbda8b"                            # InfluxDB MQTT     (db: mqtt)
@@ -721,6 +721,93 @@ group(F_MQTT, "energy-monitor", 1 * MIN, [
             "the clamp's jack on the AD HAT, and `docker ps` / `docker logs iot-sct013`\n"
             "on rohan. If every clamp is empty, rohan or the MQTT pipeline is down."),
         unit_fmt="%.4f A", no_data="Alerting",
+    ),
+])
+
+
+# ===========================================================================
+# UPS monitor (NUT -> MQTT -> measurement "ups", published every 15s)
+# ===========================================================================
+def ups_flag_rule(uid, title, field, severity, for_, summary, description):
+    """Fires while a 0/1 UPS flag is set. max() per 1m bucket, fill(0) so a
+    missing bucket reads as 'flag clear' rather than dropping the series."""
+    return rule(
+        uid, title, F_MQTT, "ups-monitor",
+        [query("A", DS_MQTT,
+               f'SELECT max("{field}") FROM "ups" WHERE $timeFilter '
+               f'AND "location" =~ /{rx(UPS_LOCATIONS)}/ '
+               f'GROUP BY time(1m), "location" fill(0)', 10 * MIN),
+         reduce("B", "A", "last"), threshold("C", "B", "gt", 0.5)],
+        "C", for_, severity, summary, description, domain="power",
+    )
+
+
+group(F_MQTT, "ups-monitor", 1 * MIN, [
+    ups_flag_rule(
+        "ups-on-battery", "UPS on battery", "on_battery", "critical", "1m",
+        summary="{{ $labels.location }}: UPS running on battery - mains lost",
+        description=(
+            "UPS:  {{ $labels.location }}\n"
+            "State: on_battery = 1 for at least 1m\n\n"
+            "Mains power is out (or the UPS input is unplugged). Connected gear is\n"
+            "running from the battery. Check the wall socket and breaker."),
+    ),
+    ups_flag_rule(
+        "ups-battery-low", "UPS battery low", "battery_low", "critical", "0m",
+        summary="{{ $labels.location }}: UPS battery low - shutdown imminent",
+        description=(
+            "UPS:  {{ $labels.location }}\n"
+            "State: battery_low = 1\n\n"
+            "The UPS reports its battery nearly empty; power loss to the connected\n"
+            "gear is imminent. Restore mains or shut the equipment down cleanly."),
+    ),
+    silence_rule(
+        "ups-silent", "UPS silent", F_MQTT, "ups-monitor", DS_MQTT,
+        f'SELECT count("input_voltage") FROM "ups" WHERE $timeFilter '
+        f'AND "location" =~ /{rx(UPS_LOCATIONS)}/ GROUP BY time(5m), "location" fill(0)',
+        6 * HOUR, "20m", "warning",
+        what="UPS at {{ $labels.location }}",
+        unit_hint=(
+            "UPS: {{ $labels.location }}\n"
+            "NOTE: a silent UPS silently disables the 'UPS on battery' and "
+            "'UPS battery low' alerts for this location -- while it is silent, "
+            "a power cut goes unreported."),
+    ),
+    rule(
+        "ups-input-voltage-out-of-range", "UPS input voltage out of range", F_MQTT,
+        "ups-monitor",
+        [query("A", DS_MQTT,
+               f'SELECT median("input_voltage") FROM "ups" WHERE $timeFilter '
+               f'AND "location" =~ /{rx(UPS_LOCATIONS)}/ AND "on_battery" = 0 '
+               f'GROUP BY time(1m), "location"', 5 * MIN),
+         reduce("B", "A", "last"),
+         math("E", "$B < 207 || $B > 253"), threshold("F", "E", "gt", 0)],
+        "F", "10m", "warning",
+        summary='{{ $labels.location }}: mains {{ printf "%.0f" $values.B.Value }} V out of range',
+        description=(
+            "UPS:      {{ $labels.location }}\n"
+            'Measured: {{ printf "%.0f" $values.B.Value }} V input (1-minute median, on mains)\n'
+            "Threshold: outside 207-253 V (230 V -10%/+10%) sustained 10m\n\n"
+            "Brownout or overvoltage on the mains feed. Only evaluated while the UPS\n"
+            "is on mains; a battery transfer is covered by 'UPS on battery'."),
+        domain="power",
+    ),
+    rule(
+        "ups-runtime-low", "UPS runtime low", F_MQTT, "ups-monitor",
+        [query("A", DS_MQTT,
+               f'SELECT median("battery_runtime") FROM "ups" WHERE $timeFilter '
+               f'AND "location" =~ /{rx(UPS_LOCATIONS)}/ AND "on_battery" = 1 '
+               f'GROUP BY time(1m), "location"', 5 * MIN),
+         reduce("B", "A", "last"), threshold("C", "B", "lt", 600)],
+        "C", "5m", "warning",
+        summary='{{ $labels.location }}: UPS runtime {{ printf "%.0f" $values.B.Value }}s left',
+        description=(
+            "UPS:      {{ $labels.location }}\n"
+            'Measured: {{ printf "%.0f" $values.B.Value }} s estimated runtime (1-minute median)\n'
+            "Threshold: below 600 s while on battery, sustained 5m\n\n"
+            "Only evaluated while on battery. Plan a clean shutdown of the\n"
+            "connected equipment."),
+        domain="power",
     ),
 ])
 
