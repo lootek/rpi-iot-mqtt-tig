@@ -38,9 +38,9 @@ WIFI_LOCATIONS = ["bathroom_tetris", "dining_room", "office"]
 UPS_LOCATIONS = ["living_room"]
 
 # --- telegraf hosts ---------------------------------------------------------
-# rohan is deliberately absent: last metric 2026-06-23, so including it would
-# mean a permanently-firing rule. Re-add it here once it is back on the network.
-HOSTS = ["ithilien", "lothlorien", "shire"]
+# rohan is back: telegraf up since 2026-11-03 after a power cycle. Last outage
+# 2026-11-01 06:06 CET: wifi silently dead, host kept running.
+HOSTS = ["ithilien", "lothlorien", "rohan", "shire"]
 
 # Containers expected to be running, per host. Pinned because telegraf has
 # reported 18 stale one-off container names (cool_yalow, elated_clarke, ...)
@@ -50,6 +50,7 @@ EXPECTED_CONTAINERS = {
                    "telegraf", "iot-dht22", "ttss-collector"],
     "ithilien": ["telegraf", "yt-rpi-player", "iot-dht22"],
     "shire": ["telegraf"],
+    "rohan": ["telegraf", "iot-sct013"],
 }
 
 # --- known-bad series, documented so nobody "helpfully" re-adds them ---------
@@ -63,7 +64,7 @@ EXPECTED_CONTAINERS = {
 #                    until then the ^(...)$ anchoring below keeps it out.
 # rivendell, rivendell.local  retired Mac, telegraf host tag
 EXCLUDED = ["arbor", "backyard-shed", "soil_1", "soil_2", '"bathroom_tetris"',
-            "rohan", "rivendell", "rivendell.local"]
+            "rivendell", "rivendell.local"]
 
 
 def rx(values):
