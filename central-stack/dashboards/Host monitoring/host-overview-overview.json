@@ -77,7 +77,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT last(\"uptime\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY \"host\"",
+          "query": "SELECT last(\"uptime\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY \"host\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -152,7 +152,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT 100 - mean(\"usage_idle\") FROM \"cpu\" WHERE \"cpu\" = 'cpu-total' AND host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT 100 - mean(\"usage_idle\") FROM \"cpu\" WHERE \"cpu\" = 'cpu-total' AND host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -227,7 +227,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"used_percent\") FROM \"mem\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"used_percent\") FROM \"mem\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -302,7 +302,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"used_percent\") FROM \"swap\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"used_percent\") FROM \"swap\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -377,7 +377,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT last(\"used_percent\") FROM \"disk\" WHERE \"path\" = '/' AND host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY \"host\"",
+          "query": "SELECT last(\"used_percent\") FROM \"disk\" WHERE \"path\" = '/' AND host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY \"host\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -452,7 +452,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"value\") / 1000 FROM \"cpu_temperature\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"value\") / 1000 FROM \"cpu_temperature\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -527,7 +527,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"load5\") / mean(\"n_cpus\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"load5\") / mean(\"n_cpus\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -591,7 +591,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT last(\"n_containers_running\") FROM \"docker\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY \"host\"",
+          "query": "SELECT last(\"n_containers_running\") FROM \"docker\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY \"host\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -661,7 +661,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT 100 - mean(\"usage_idle\") FROM \"cpu\" WHERE \"cpu\" = 'cpu-total' AND host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT 100 - mean(\"usage_idle\") FROM \"cpu\" WHERE \"cpu\" = 'cpu-total' AND host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -731,7 +731,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"used_percent\") FROM \"mem\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"used_percent\") FROM \"mem\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -799,7 +799,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"value\") / 1000 FROM \"cpu_temperature\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"value\") / 1000 FROM \"cpu_temperature\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -867,7 +867,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT mean(\"load5\") / mean(\"n_cpus\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
+          "query": "SELECT mean(\"load5\") / mean(\"n_cpus\") FROM \"system\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND $timeFilter GROUP BY time($__interval), \"host\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -938,7 +938,7 @@
             "uid": "be414ba9-5127-4be8-a621-e910639f96b1"
           },
           "editorMode": "code",
-          "query": "SELECT last(\"used_percent\") FROM \"disk\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan)$/ AND \"path\" !~ /^\\/(dev|run|sys|proc|boot)/ AND \"path\" !~ /overlay/ AND $timeFilter GROUP BY \"host\", \"path\"",
+          "query": "SELECT last(\"used_percent\") FROM \"disk\" WHERE host =~ /^(lothlorien|shire|ithilien|rohan|rivendell)$/ AND \"path\" !~ /^\\/(dev|run|sys|proc|boot)/ AND \"path\" !~ /overlay/ AND $timeFilter GROUP BY \"host\", \"path\"",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -1302,5 +1302,5 @@
   "timezone": "browser",
   "title": "Overview",
   "uid": "host-overview",
-  "version": 4
+  "version": 5
 }
