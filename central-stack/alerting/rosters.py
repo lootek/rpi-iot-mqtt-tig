@@ -34,8 +34,8 @@ SPS30_LOCATIONS = ["patio"]                     # particulates
 WIFI_LOCATIONS = ["bathroom_tetris", "dining_room", "office"]
 
 # UPS units publishing to mqtt.ups. Add a location only once it publishes --
-# listing it earlier would make ups-silent fire immediately ("boiler_room" comes with moria).
-UPS_LOCATIONS = ["living_room", "attic"]
+# listing it earlier would make ups-silent fire immediately.
+UPS_LOCATIONS = ["living_room", "attic", "boiler_room"]
 
 # --- telegraf hosts ---------------------------------------------------------
 # rohan is back: telegraf up since 2026-11-03 after a power cycle. Last outage
