@@ -1,0 +1,12 @@
+[Unit]
+Description=Publish DS18B20 temperatures to MQTT
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/sbin/ds18b20.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
