@@ -3,29 +3,14 @@
 Read-only monitoring of USB UPSes (Green Cell Micropower 600VA, `0001:0000 MEC0003`) via NUT.
 Nothing here sends shutdown/test/beeper commands to the UPS.
 
-## Install (per host with a USB-attached UPS, run as root)
+## Install (per host with a USB-attached UPS)
 ```sh
-apt install -y nut nut-client python3-paho-mqtt
-echo MODE=standalone > /etc/nut/nut.conf
-echo 'LISTEN 127.0.0.1 3493' > /etc/nut/upsd.conf
-truncate -s0 /etc/nut/upsd.users          # read-only: no users, no instcmds
-cat > /etc/nut/ups.conf <<CONF
-[ups]
-  driver = nutdrv_qx
-  port = auto
-  protocol = q1
-  pollfreq = 15
-  default.battery.voltage.nominal = 12
-  default.battery.voltage.low = 10.5
-  default.battery.voltage.high = 13.0
-  runtimecal = <t100>,100,<t25>,25
-CONF
-systemctl enable --now nut-driver nut-server
-install -m755 ups-mqtt.py /usr/local/sbin/ups-mqtt.py
-install -m644 ups-mqtt.service /etc/systemd/system/
-systemctl daemon-reload && systemctl enable --now ups-mqtt
+# as root, from this directory; argument = battery capacity in Ah (sets runtimecal)
+./install.sh 26
 ```
-Add the host to the `locations` map in `ups-mqtt.py` (lothlorien → `living_room`, shire → `attic`).
+Installs NUT (read-only: no upsmon, no users, no instant commands), writes `/etc/nut/*`, deploys
+`ups-mqtt.py` + `ups-mqtt.service`. Add the host to the `locations` map in `ups-mqtt.py`
+(lothlorien → `living_room`, shire → `attic`, moria → `boiler_room`).
 
 ## runtimecal
 `E_wh = 12 * Ah * 0.8 * 0.85`; `t(load%) = E_wh / (load% * 3.6 W) * 3600` (600VA ≈ 360W);
@@ -35,6 +20,7 @@ value `t(100),100,t(25),25` (high-load pair first).
 |---|---|---|
 | lothlorien | 20 | `1632,100,6528,25` |
 | shire (UPS#2) | 26 | `2122,100,8486,25` |
+| moria (UPS#3) | ~9 (confirm) | `734,100,2938,25` |
 
 Charge % is a voltage estimate (low/high from ups.conf); runtime is an extrapolation — indicative only.
 

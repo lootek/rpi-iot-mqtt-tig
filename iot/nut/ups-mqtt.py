@@ -21,6 +21,7 @@ hostname = socket.gethostname()
 locations = {
     "lothlorien": "living_room",
     "shire": "attic",
+    "moria": "boiler_room",
 }
 brokers = {
     "lothlorien": "127.0.0.1",
