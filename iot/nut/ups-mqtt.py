@@ -74,11 +74,11 @@ def fields(data):
 def connect():
     cid = "{}-python-ups".format(hostname)
     if hasattr(mqtt_client, "CallbackAPIVersion"):  # paho 2.x
-        c = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, cid)
+        c = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION2, cid)
     else:
         c = mqtt_client.Client(cid)
-    c.on_connect = lambda cl, u, f, rc: print("MQTT connect rc={}".format(rc), flush=True)
-    c.on_disconnect = lambda cl, u, rc: print("MQTT disconnect rc={}".format(rc), flush=True)
+    c.on_connect = lambda *a: print("MQTT connected", flush=True)
+    c.on_disconnect = lambda *a: print("MQTT disconnected", flush=True)
     c.connect_async(broker, PORT, keepalive=60)
     c.loop_start()
     return c
