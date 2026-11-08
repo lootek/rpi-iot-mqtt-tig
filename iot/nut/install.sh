@@ -33,12 +33,15 @@ EOF
 udevadm control --reload
 udevadm trigger --subsystem-match=usb
 
-if systemctl list-unit-files 'nut-driver@.service' | grep -q nut-driver@; then
+units=$(systemctl list-unit-files 'nut-driver@.service')   # not piped into grep -q: SIGPIPE + pipefail
+if [[ $units == *nut-driver@* ]]; then
   # NUT >= 2.8: per-UPS driver units
   systemctl enable --now nut-driver-enumerator 2>/dev/null || true
-  systemctl enable --now nut-driver@ups
+  systemctl enable nut-driver@ups
+  systemctl restart nut-driver@ups || echo "WARN: driver not started (UPS connected?)"
 else
-  systemctl enable --now nut-driver
+  systemctl enable nut-driver
+  systemctl restart nut-driver || echo "WARN: driver not started (UPS connected?)"
 fi
 systemctl enable nut-server
 systemctl restart nut-server
@@ -50,5 +53,5 @@ systemctl enable ups-mqtt
 systemctl restart ups-mqtt
 
 sleep 10
-upsc ups ups.status
-systemctl is-active nut-server ups-mqtt
+upsc ups ups.status || echo "WARN: no UPS data yet"
+systemctl is-active nut-server ups-mqtt || true
