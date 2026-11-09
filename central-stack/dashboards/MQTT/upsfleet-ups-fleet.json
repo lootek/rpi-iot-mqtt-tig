@@ -85,7 +85,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "value_and_name"
@@ -186,12 +186,13 @@
         "type": "influxdb",
         "uid": "fecz574dkbda8b"
       },
+      "description": "Driver estimate. Loads under 10% are treated as 10% (NUT idle-load default), so at near-idle load this sits at a constant value until a real load or outage appears.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
+          "decimals": 1,
           "mappings": [],
           "noValue": "no data",
           "thresholds": {
@@ -1062,5 +1063,5 @@
   "timezone": "browser",
   "title": "UPS fleet",
   "uid": "upsfleet",
-  "version": 1
+  "version": 2
 }
