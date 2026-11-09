@@ -15,6 +15,7 @@ from pcbnew import (BOARD, NETINFO_ITEM, PCB_TRACK, PCB_SHAPE, PCB_TEXT, ZONE, Z
                     EDA_ANGLE, DEGREES_T, FootprintLoad, F_Cu, B_Cu, F_SilkS, Edge_Cuts, SHAPE_T_SEGMENT, SHAPE_T_ARC)
 
 FP = K + "/SharedSupport/footprints/"
+ONBOARD_LEDS = "--leds-onboard" in sys.argv     # LEDs soldered on the board instead of the external terminal
 W, H, R = 86.0, 54.0, 3.0
 def mm(v): return FromMM(v)
 def P(x, y): return VECTOR2I(mm(x), mm(y))
@@ -76,8 +77,6 @@ for r in (JL, JR):
 
 # LED section: 220 R in series per LED, cathodes common. Terminal pins (top to bottom): G Y R K
 PW, SW = 0.5, 0.3
-JK = fp("TerminalBlock_Phoenix", "TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal", "J3", "LEDs", 6.0, 20.7, 270, hide_ref=True)
-setnet(JK, {"1": "G_A", "2": "Y_A", "3": "R_A", "4": "GND"})
 RV = "R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical"
 y25, y26, y27 = ry(7), ry(8), ry(9)             # D25, D26, D27 rows on the left socket
 r3 = fp("Resistor_THT", RV, "R3", "220", 24.0, y25, 90)   # pad 2 goes up
@@ -87,10 +86,25 @@ setnet(r3, {"1": "LED_G", "2": "G_A"}); setnet(r4, {"1": "LED_Y", "2": "Y_A"}); 
 track([(XL, y25), (24.0, y25)], F_Cu, "LED_G", SW)
 track([(XL, y26), (20.0, y26)], F_Cu, "LED_Y", SW)
 track([(XL, y27), (16.0, y27)], F_Cu, "LED_R", SW)
-track([(24.0, y25 - PITCH), (12.0, y25 - PITCH), (12.0, 20.7), (6.0, 20.7)], F_Cu, "G_A", SW)
-track([(20.0, y26 - PITCH), (6.0, y26 - PITCH)], F_Cu, "Y_A", SW)
-track([(16.0, y27 - PITCH), (12.0, y27 - PITCH), (12.0, 30.86), (6.0, 30.86)], F_Cu, "R_A", SW)
-text("LED top to bottom: G Y R K(-)", 18.0, 17.4, 0.8)
+if ONBOARD_LEDS:
+    # 5 mm LEDs, anode (pad 2) toward the resistors, cathode (pad 1) on the ground pour. Rows: G, Y, R
+    LY = (19.5, 26.5, 33.5)
+    for ref, net, y in (("D1", "G_A", LY[0]), ("D2", "Y_A", LY[1]), ("D3", "R_A", LY[2])):
+        d = fp("LED_THT", "LED_D5.0mm", ref, "LED", 9.46, y, hide_ref=True)
+        setnet(d, {"1": "GND", "2": net})
+    track([(24.0, y25 - PITCH), (14.5, y25 - PITCH), (14.5, LY[0]), (12.0, LY[0])], F_Cu, "G_A", SW)
+    track([(20.0, y26 - PITCH), (14.5, y26 - PITCH), (14.5, LY[1]), (12.0, LY[1])], F_Cu, "Y_A", SW)
+    track([(16.0, y27 - PITCH), (14.5, y27 - PITCH), (14.5, LY[2]), (12.0, LY[2])], F_Cu, "R_A", SW)
+    text("G", 5.0, LY[0], 1.0); text("Y", 5.0, LY[1], 1.0); text("R", 5.0, LY[2], 1.0)
+    text("CO2", 10.0, 15.5, 1.0)
+else:
+    # external LEDs through a terminal. Terminal pins (top to bottom): G Y R K
+    JK = fp("TerminalBlock_Phoenix", "TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal", "J3", "LEDs", 6.0, 20.7, 270, hide_ref=True)
+    setnet(JK, {"1": "G_A", "2": "Y_A", "3": "R_A", "4": "GND"})
+    track([(24.0, y25 - PITCH), (12.0, y25 - PITCH), (12.0, 20.7), (6.0, 20.7)], F_Cu, "G_A", SW)
+    track([(20.0, y26 - PITCH), (6.0, y26 - PITCH)], F_Cu, "Y_A", SW)
+    track([(16.0, y27 - PITCH), (12.0, y27 - PITCH), (12.0, 30.86), (6.0, 30.86)], F_Cu, "R_A", SW)
+    text("LED top to bottom: G Y R K(-)", 18.0, 17.4, 0.8)
 
 # sensors on the right
 BX = 62.0
@@ -127,8 +141,8 @@ for layer in (F_Cu, B_Cu):
     b.Add(z)
 ZONE_FILLER(b).Fill(b.Zones())
 
-text("esp32 node v1 - DevKit V1 30-pin, USB down", 38.0, 3.2, 1.0)
+text("esp32 node %s - DevKit V1 30-pin, USB down" % ("v1b leds" if ONBOARD_LEDS else "v1"), 38.0, 3.2, 1.0)
 text("BME280", BX, 5.8, 0.8)
 text("SCD30  3V3 GND SCL SDA", 71.0, 1.9, 0.8)
 text("DHT22  3V3 DAT GND", 70.0, 29.6, 0.8)
-pcbnew.SaveBoard("esp32-node.kicad_pcb", b)
+pcbnew.SaveBoard("esp32-node-leds.kicad_pcb" if ONBOARD_LEDS else "esp32-node.kicad_pcb", b)

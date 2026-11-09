@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 810" font-family="Helvetica,Arial,sans-serif">
+<rect width="1180" height="810" fill="#fff"/>
+<text x="30" y="34" font-size="22" font-weight="bold">ESP32 node - wiring (room node: BME280 + SCD30 + DHT22 + 3 LEDs)</text>
+<text x="30" y="56" font-size="12.5" fill="#444">30-pin DevKit V1, USB end at the bottom. All parts run from 3V3. LEDs: on-board (v1b) or on the 4-way terminal (v1) - same circuit.</text>
+<text x="30" y="74" font-size="12.5" fill="#444">Backyard shed: BME280 only. Wires that cross without a dot are not connected.</text>
+<path d="M740,174 L740,348" fill="none" stroke="#e08a00" stroke-width="3" stroke-linejoin="round"/>
+<text x="740" y="96" font-size="11" text-anchor="middle" fill="#e08a00" font-weight="bold">SCL</text>
+<path d="M770,200 L770,372" fill="none" stroke="#1e88e5" stroke-width="3" stroke-linejoin="round"/>
+<text x="770" y="96" font-size="11" text-anchor="middle" fill="#1e88e5" font-weight="bold">SDA</text>
+<path d="M800,128 L800,616" fill="none" stroke="#d32f2f" stroke-width="3" stroke-linejoin="round"/>
+<text x="800" y="96" font-size="11" text-anchor="middle" fill="#d32f2f" font-weight="bold">3V3</text>
+<path d="M830,152 L830,582" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<text x="830" y="96" font-size="11" text-anchor="middle" fill="#222" font-weight="bold">GND</text>
+<path d="M690,174 L740,174" fill="none" stroke="#e08a00" stroke-width="3"/>
+<circle cx="740" cy="174" r="4.5" fill="#e08a00"/>
+<path d="M690,276 L735,276 A5,5 0 0 1 745,276 L770,276" fill="none" stroke="#1e88e5" stroke-width="3"/>
+<circle cx="770" cy="276" r="4.5" fill="#1e88e5"/>
+<path d="M690,616 L800,616" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="800" cy="616" r="4.5" fill="#d32f2f"/>
+<path d="M690,582 L795,582 A5,5 0 0 1 805,582 L830,582" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="830" cy="582" r="4.5" fill="#222"/>
+<path d="M800,128 L900,128" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="800" cy="128" r="4.5" fill="#d32f2f"/>
+<path d="M830,152 L900,152" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="830" cy="152" r="4.5" fill="#222"/>
+<path d="M740,176 L795,176 A5,5 0 0 1 805,176 L825,176 A5,5 0 0 1 835,176 L900,176" fill="none" stroke="#e08a00" stroke-width="3"/>
+<circle cx="740" cy="176" r="4.5" fill="#e08a00"/>
+<path d="M770,200 L795,200 A5,5 0 0 1 805,200 L825,200 A5,5 0 0 1 835,200 L900,200" fill="none" stroke="#1e88e5" stroke-width="3"/>
+<circle cx="770" cy="200" r="4.5" fill="#1e88e5"/>
+<path d="M800,224 L825,224 A5,5 0 0 1 835,224 L900,224" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="800" cy="224" r="4.5" fill="#d32f2f"/>
+<path d="M830,248 L900,248" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="830" cy="248" r="4.5" fill="#222"/>
+<path d="M800,300 L825,300 A5,5 0 0 1 835,300 L900,300" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="800" cy="300" r="4.5" fill="#d32f2f"/>
+<path d="M830,324 L900,324" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="830" cy="324" r="4.5" fill="#222"/>
+<path d="M740,348 L765,348 A5,5 0 0 1 775,348 L795,348 A5,5 0 0 1 805,348 L825,348 A5,5 0 0 1 835,348 L900,348" fill="none" stroke="#e08a00" stroke-width="3"/>
+<circle cx="740" cy="348" r="4.5" fill="#e08a00"/>
+<path d="M770,372 L795,372 A5,5 0 0 1 805,372 L825,372 A5,5 0 0 1 835,372 L900,372" fill="none" stroke="#1e88e5" stroke-width="3"/>
+<circle cx="770" cy="372" r="4.5" fill="#1e88e5"/>
+<path d="M800,456 L825,456 A5,5 0 0 1 835,456 L900,456" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="800" cy="456" r="4.5" fill="#d32f2f"/>
+<path d="M690,480 L795,480 A5,5 0 0 1 805,480 L825,480 A5,5 0 0 1 835,480 L900,480" fill="none" stroke="#2e7d32" stroke-width="3"/>
+<path d="M830,504 L900,504" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="830" cy="504" r="4.5" fill="#222"/>
+<rect x="900" y="104" width="230" height="158" rx="6" fill="#f5f5f5" stroke="#666"/>
+<text x="1000" y="122" font-size="13" font-weight="bold">BME280</text>
+<text x="1000" y="137" font-size="11" fill="#555">6-pin socket, I2C 0x76</text>
+<circle cx="900" cy="128" r="5" fill="#d32f2f"/>
+<text x="912" y="132" font-size="12">VCC</text>
+<circle cx="900" cy="152" r="5" fill="#222"/>
+<text x="912" y="156" font-size="12">GND</text>
+<circle cx="900" cy="176" r="5" fill="#e08a00"/>
+<text x="912" y="180" font-size="12">SCL</text>
+<circle cx="900" cy="200" r="5" fill="#1e88e5"/>
+<text x="912" y="204" font-size="12">SDA</text>
+<circle cx="900" cy="224" r="5" fill="#d32f2f"/>
+<text x="912" y="228" font-size="12">CSB (to 3V3 on board)</text>
+<circle cx="900" cy="248" r="5" fill="#222"/>
+<text x="912" y="252" font-size="12">SDO (to GND on board)</text>
+<rect x="900" y="276" width="230" height="110" rx="6" fill="#f5f5f5" stroke="#666"/>
+<text x="1000" y="294" font-size="13" font-weight="bold">SCD30</text>
+<text x="1000" y="309" font-size="11" fill="#555">terminal, 4 wires</text>
+<circle cx="900" cy="300" r="5" fill="#d32f2f"/>
+<text x="912" y="304" font-size="12">VIN</text>
+<circle cx="900" cy="324" r="5" fill="#222"/>
+<text x="912" y="328" font-size="12">GND</text>
+<circle cx="900" cy="348" r="5" fill="#e08a00"/>
+<text x="912" y="352" font-size="12">SCL (TX)</text>
+<circle cx="900" cy="372" r="5" fill="#1e88e5"/>
+<text x="912" y="376" font-size="12">SDA (RX)</text>
+<rect x="900" y="422" width="230" height="100" rx="6" fill="#f5f5f5" stroke="#666"/>
+<text x="1000" y="440" font-size="13" font-weight="bold">DHT22 module</text>
+<text x="1000" y="455" font-size="11" fill="#555">3-pin, has its own pull-up</text>
+<circle cx="900" cy="456" r="5" fill="#d32f2f"/>
+<text x="912" y="460" font-size="12">+ (VCC)</text>
+<circle cx="900" cy="480" r="5" fill="#2e7d32"/>
+<text x="912" y="484" font-size="12">OUT / DATA</text>
+<circle cx="900" cy="504" r="5" fill="#222"/>
+<text x="912" y="508" font-size="12">- (GND)</text>
+<rect x="308" y="102" width="404" height="552" rx="10" fill="#eef2f7" stroke="#789" stroke-dasharray="5 4"/>
+<text x="510" y="124" font-size="14" font-weight="bold" text-anchor="middle" fill="#456">ESP32 DevKit V1 (30-pin)</text>
+<text x="510" y="654" font-size="12" text-anchor="middle" fill="#666">&#9660; USB-C end</text>
+<circle cx="330" cy="140" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="144" font-size="12">EN</text>
+<circle cx="690" cy="140" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="144" font-size="12" text-anchor="end">D23</text>
+<circle cx="330" cy="174" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="178" font-size="12">VP</text>
+<circle cx="690" cy="174" r="11" fill="none" stroke="#e08a00" stroke-width="3"/>
+<circle cx="690" cy="174" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="178" font-size="12" text-anchor="end" font-weight="bold">D22</text>
+<circle cx="330" cy="208" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="212" font-size="12">VN</text>
+<circle cx="690" cy="208" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="212" font-size="12" text-anchor="end">TX0</text>
+<circle cx="330" cy="242" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="246" font-size="12">D34</text>
+<circle cx="690" cy="242" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="246" font-size="12" text-anchor="end">RX0</text>
+<circle cx="330" cy="276" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="280" font-size="12">D35</text>
+<circle cx="690" cy="276" r="11" fill="none" stroke="#1e88e5" stroke-width="3"/>
+<circle cx="690" cy="276" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="280" font-size="12" text-anchor="end" font-weight="bold">D21</text>
+<circle cx="330" cy="310" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="314" font-size="12">D32</text>
+<circle cx="690" cy="310" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="314" font-size="12" text-anchor="end">D19</text>
+<circle cx="330" cy="344" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="348" font-size="12">D33</text>
+<circle cx="690" cy="344" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="348" font-size="12" text-anchor="end">D18</text>
+<circle cx="330" cy="378" r="11" fill="none" stroke="#2e9d3a" stroke-width="3"/>
+<circle cx="330" cy="378" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="382" font-size="12" font-weight="bold">D25</text>
+<circle cx="690" cy="378" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="382" font-size="12" text-anchor="end">D5</text>
+<circle cx="330" cy="412" r="11" fill="none" stroke="#e6b800" stroke-width="3"/>
+<circle cx="330" cy="412" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="416" font-size="12" font-weight="bold">D26</text>
+<circle cx="690" cy="412" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="416" font-size="12" text-anchor="end">D17</text>
+<circle cx="330" cy="446" r="11" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="330" cy="446" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="450" font-size="12" font-weight="bold">D27</text>
+<circle cx="690" cy="446" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="450" font-size="12" text-anchor="end">D16</text>
+<circle cx="330" cy="480" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="484" font-size="12">D14</text>
+<circle cx="690" cy="480" r="11" fill="none" stroke="#2e7d32" stroke-width="3"/>
+<circle cx="690" cy="480" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="484" font-size="12" text-anchor="end" font-weight="bold">D4</text>
+<circle cx="330" cy="514" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="518" font-size="12">D12</text>
+<circle cx="690" cy="514" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="518" font-size="12" text-anchor="end">D2</text>
+<circle cx="330" cy="548" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="552" font-size="12">D13</text>
+<circle cx="690" cy="548" r="7" fill="#cfd8dc" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="552" font-size="12" text-anchor="end">D15</text>
+<circle cx="330" cy="582" r="11" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="330" cy="582" r="7" fill="#222" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="586" font-size="12" font-weight="bold">GND</text>
+<circle cx="690" cy="582" r="11" fill="none" stroke="#222" stroke-width="3"/>
+<circle cx="690" cy="582" r="7" fill="#222" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="586" font-size="12" text-anchor="end" font-weight="bold">GND</text>
+<circle cx="330" cy="616" r="7" fill="#e53935" stroke="#000" stroke-width="0.8"/>
+<text x="346" y="620" font-size="12">VIN</text>
+<circle cx="690" cy="616" r="11" fill="none" stroke="#d32f2f" stroke-width="3"/>
+<circle cx="690" cy="616" r="7" fill="#e53935" stroke="#000" stroke-width="0.8"/>
+<text x="674" y="620" font-size="12" text-anchor="end" font-weight="bold">3V3</text>
+<path d="M330,378 L292,378 L292,330 L250,330" fill="none" stroke="#2e9d3a" stroke-width="3" stroke-linejoin="round"/>
+<rect x="170" y="322" width="80" height="16" fill="#fff" stroke="#555" stroke-width="2"/>
+<text x="210" y="317" font-size="11" text-anchor="middle" fill="#333">220 &#937;</text>
+<path d="M170,330 L140,330" fill="none" stroke="#2e9d3a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="125" cy="330" r="14" fill="#2e9d3a" stroke="#222" stroke-width="2"/>
+<text x="125" y="334" font-size="11" text-anchor="middle" font-weight="bold" fill="#fff">G</text>
+<text x="140" y="312" font-size="11" fill="#222">+</text>
+<path d="M111,330 L80,330" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="80" cy="330" r="4.5" fill="#222"/>
+<path d="M330,412 L292,412 L292,412 L250,412" fill="none" stroke="#e6b800" stroke-width="3" stroke-linejoin="round"/>
+<rect x="170" y="404" width="80" height="16" fill="#fff" stroke="#555" stroke-width="2"/>
+<text x="210" y="399" font-size="11" text-anchor="middle" fill="#333">220 &#937;</text>
+<path d="M170,412 L140,412" fill="none" stroke="#e6b800" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="125" cy="412" r="14" fill="#e6b800" stroke="#222" stroke-width="2"/>
+<text x="125" y="416" font-size="11" text-anchor="middle" font-weight="bold" fill="#fff">Y</text>
+<text x="140" y="394" font-size="11" fill="#222">+</text>
+<path d="M111,412 L80,412" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="80" cy="412" r="4.5" fill="#222"/>
+<path d="M330,446 L292,446 L292,494 L250,494" fill="none" stroke="#d32f2f" stroke-width="3" stroke-linejoin="round"/>
+<rect x="170" y="486" width="80" height="16" fill="#fff" stroke="#555" stroke-width="2"/>
+<text x="210" y="481" font-size="11" text-anchor="middle" fill="#333">220 &#937;</text>
+<path d="M170,494 L140,494" fill="none" stroke="#d32f2f" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="125" cy="494" r="14" fill="#d32f2f" stroke="#222" stroke-width="2"/>
+<text x="125" y="498" font-size="11" text-anchor="middle" font-weight="bold" fill="#fff">R</text>
+<text x="140" y="476" font-size="11" fill="#222">+</text>
+<path d="M111,494 L80,494" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="80" cy="494" r="4.5" fill="#222"/>
+<path d="M80,330 L80,582 L330,582" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+<text x="30" y="278" font-size="12" font-weight="bold">CO2 LEDs</text>
+<text x="30" y="293" font-size="11" fill="#555">long leg (+) toward the resistor</text>
+<text x="100" y="598" font-size="11" fill="#555">cathodes (-) to GND</text>
+<text x="30" y="715" font-size="12" fill="#333">&#8226; I2C bus: BME280 (0x76) and SCD30 (0x61) share SDA D21 / SCL D22.</text>
+<text x="30" y="735" font-size="12" fill="#333">&#8226; DHT22 data on D4. The 3-pin module has a built-in pull-up; a bare 4-pin DHT22 needs 10k from DATA to 3V3.</text>
+<text x="30" y="755" font-size="12" fill="#333">&#8226; LED pins D25 / D26 / D27 go high to light the LED (series 220 ohm, about 6 mA at 3.3 V).</text>
+<text x="30" y="775" font-size="12" fill="#333">&#8226; On the PCB: LEDs go in the 4-way terminal as G Y R K (v1) or are soldered on the board (v1b).</text>
+</svg>

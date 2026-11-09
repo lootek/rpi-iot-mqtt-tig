@@ -2,7 +2,8 @@
 
 86 x 54 mm, 2-layer FR-4, DRC clean (KiCad 10: 0 violations, 0 unconnected). Used by the shed, office and dining_room nodes
 (see ~/ai/esp32-weather-v2 spec). Populate only what a node needs; the shed needs just the BME280 socket.
-Files: `esp32-node.kicad_pcb`, `esp32-node-gerbers.zip` (order this), `gen_esp32.py` (regenerates everything).
+Files: `esp32-node.kicad_pcb` + `esp32-node-gerbers.zip` (v1: LEDs external on a 4-way terminal), `esp32-node-leds.kicad_pcb` + `esp32-node-leds-gerbers.zip` (v1b: 3 LEDs soldered on the board), `gen_esp32.py` (regenerates both; `--leds-onboard` for v1b), `esp32-wiring.svg/png` (wiring diagram, `gen-esp32-wiring.py`).
+Order one of the two Gerber zips. v1b has 5 mm LEDs (green, yellow, red) at the left edge, 7 mm apart, long leg (anode) toward the resistors.
 
 ## DevKit and orientation
 30-pin DOIT-style DevKit V1 (USB-C, CH340), two 1x15 headers **25.4 mm apart** (10 pitches).
