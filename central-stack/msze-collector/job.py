@@ -239,6 +239,22 @@ def serve_scheduler(run, hour: int = 3, stop=None, now_fn=None, chunk: float = W
 
 # --------------------------------------------------------------------- CLI
 
+def make_runner(key: str, data_dir: str | None = None, churches_path: str | None = None):
+    """Build the nightly runner from env defaults (DATA_DIR, CHURCHES); shared by the CLI and app.py.
+    Returns run(**kw) -> summary."""
+    data_dir = data_dir or os.environ.get("DATA_DIR", "/data")
+    churches_path = churches_path or os.environ.get("CHURCHES") or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "churches.yaml")
+    churches = load_churches(churches_path)
+    store = Store(os.path.join(data_dir, "cache.json"))
+    llm = OpenRouter(key)
+
+    def run(**kw) -> dict:
+        return run_nightly(datetime.now(WARSAW), store, churches, llm, fetcher=fetch_doc, **kw)
+
+    return run
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="msze-collector nightly extraction job")
     ap.add_argument("--once", action="store_true", help="run once and exit (default: nightly scheduler)")
@@ -251,16 +267,7 @@ def main(argv: list[str] | None = None) -> int:
         print("OPENROUTER_API_KEY is not set", file=sys.stderr)
         raise SystemExit(2)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
-
-    data_dir = os.environ.get("DATA_DIR", "/data")
-    churches_path = os.environ.get("CHURCHES") or os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "churches.yaml")
-    churches = load_churches(churches_path)
-    store = Store(os.path.join(data_dir, "cache.json"))
-    llm = OpenRouter(key)
-
-    def run(**kw) -> dict:
-        return run_nightly(datetime.now(WARSAW), store, churches, llm, fetcher=fetch_doc, **kw)
+    run = make_runner(key)
 
     if args.once:
         summary = run(force_schedule=args.force_schedule, dry_run=args.dry_run)

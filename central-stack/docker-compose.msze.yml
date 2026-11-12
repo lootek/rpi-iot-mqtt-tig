@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  # Holy Mass schedule collector -> JSON for the Grafana Infinity datasource.
+  # The nightly job (OpenRouter LLM extraction) runs inside this container
+  # only when MSZE_SCHEDULER=1; the default is API-only, so the container
+  # starts and serves /health without any secret.
+  msze-collector:
+    image: msze-collector:latest
+    build:
+      context: ./msze-collector
+      dockerfile: Dockerfile
+    container_name: msze-collector
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    volumes:
+      - msze-data:/data
+    # OPENROUTER_API_KEY lives in env/msze.secret (mode 600, gitignored and
+    # blocked by hooks/pre-commit). Optional: needs compose >= 2.24.
+    env_file:
+      - path: ../env/msze.secret
+        required: false
+    environment:
+      - PORT=8091
+      - DATA_DIR=/data
+      - MSZE_SCHEDULER=0
+
+volumes:
+  msze-data:

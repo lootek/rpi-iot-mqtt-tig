@@ -28,3 +28,6 @@ env/grafana.secret
 # Runtime state shared between mqtt-to-influxdb and aqicn-ui
 volumes/aqicn/
 __pycache__/
+
+# Secrets: copy the *.secret.example next to it and fill in — never commit
+env/*.secret
