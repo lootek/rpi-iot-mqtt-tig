@@ -29,6 +29,9 @@ GRAFANA_BASE = "http://192.168.10.18:3000"
 DASH_ROOM = "aem53k0pia29sd"   # Room conditions
 DASH_NODES = "000000127"       # Nodes
 DASH_ELECTRICAL = "d4a21ddd-1eb6-4080-b000-36d50e528ef1"   # Electrical energy
+DASH_MSZE = "msze"             # Msze (Holy Mass departures)
+
+DS_MSZE = "msze-infinity"      # Infinity datasource -> msze-collector (127.0.0.1:8091)
 
 MIN, HOUR = 60, 3600
 
@@ -45,6 +48,39 @@ def query(ref, ds, sql, frm, to=0):
             "query": sql,
             "rawQuery": True,
             "resultFormat": "time_series",
+            "intervalMs": 60000,
+            "maxDataPoints": 43200,
+        },
+    }
+
+
+def infinity_query(ref, ds_uid, url, selector, frm=10 * MIN, to=0):
+    """Alert query against the Infinity datasource: one numeric field of a JSON
+    document, read as a single-row table.
+
+    Alerting runs on the Grafana backend, so the model must use parser "backend"
+    (the "simple" parser only exists in the browser and fails in rules). The
+    root is the document itself, hence an empty root_selector; `selector`
+    becomes a number column named after itself. A JSON null in that field yields
+    a null number, which the reduce step's dropNN discards.
+    """
+    return {
+        "refId": ref,
+        "relativeTimeRange": {"from": frm, "to": to},
+        "datasourceUid": ds_uid,
+        "model": {
+            "refId": ref,
+            "datasource": {"type": "yesoreyeram-infinity-datasource", "uid": ds_uid},
+            "type": "json",
+            "source": "url",
+            "parser": "backend",
+            "format": "table",
+            "url": url,
+            "url_options": {"method": "GET", "data": "", "params": [], "headers": []},
+            "root_selector": "",
+            "columns": [{"selector": selector, "text": selector, "type": "number"}],
+            "filters": [],
+            "global_query_id": "",
             "intervalMs": 60000,
             "maxDataPoints": 43200,
         },
@@ -490,6 +526,35 @@ group(F_HOST, "host-liveness", 1 * MIN, [
             "  docker logs --tail 50 {{ $labels.container_name }}"
         ),
         domain="host", dashboard=DASH_NODES,
+    ),
+    # Pipeline health for the Holy Mass collector. Its /health JSON is only
+    # reachable through the Infinity datasource (not InfluxDB). noData stays OK
+    # on purpose: before the first nightly run heartbeat_age_h is null, which
+    # must not page on day one, and a dead container is already covered by
+    # 'Container not running' above. A fetch error (collector unreachable)
+    # surfaces as a Grafana DatasourceError alert via execErrState.
+    rule(
+        "host-msze-heartbeat-stale", "msze-collector nightly heartbeat stale",
+        F_HOST, "host-liveness",
+        [infinity_query("A", DS_MSZE, "http://127.0.0.1:8091/health", "heartbeat_age_h"),
+         reduce("B", "A", "last"), threshold("C", "B", "gt", 36)],
+        "C", "30m", "warning",
+        summary='msze-collector: last nightly run {{ printf "%.0f" $values.B.Value }} h ago (limit 36 h)',
+        description=(
+            'Measured:  heartbeat_age_h = {{ printf "%.1f" $values.B.Value }} h\n'
+            "Threshold: above 36 h sustained for 30m\n\n"
+            "The collector's nightly job (~03:00 Warsaw) writes a heartbeat after every\n"
+            "run. More than 36 h without one means at least one night was missed, so the\n"
+            "Mass dashboard is serving stale data.\n\n"
+            "Never-ran case: heartbeat_age_h is null until the first run, and no data is\n"
+            "treated as OK so a fresh deploy does not alert. A dead container is caught\n"
+            "by 'Container not running'.\n\n"
+            "Action on lothlorien:\n"
+            "  docker logs --tail 100 msze-collector\n"
+            "  curl -s localhost:8091/health\n"
+            "Also check that MSZE_SCHEDULER=1 and the OpenRouter key is still valid."
+        ),
+        domain="host", dashboard=DASH_MSZE,
     ),
 ])
 

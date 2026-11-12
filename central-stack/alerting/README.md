@@ -1,6 +1,6 @@
 # Alerting for the RPi/IoT fleet
 
-31 Grafana alert rules covering the MQTT sensor estate, the pipeline it depends
+32 Grafana alert rules covering the MQTT sensor estate, the pipeline it depends
 on, and host health. Source of truth is `catalog.py`; `apply.py` pushes it to
 Grafana on lothlorien.
 
@@ -114,9 +114,19 @@ are trustworthy before unpausing, or it fires permanently on all three.
 |---|---|---|---|
 | Host not reporting | telegraf silent from a pinned host | 6m | critical |
 | Container not running | an expected container stops | 10m | critical |
+| msze-collector nightly heartbeat stale | `/health` `heartbeat_age_h` > 36 | 30m | warning |
 
 rohan died on 2026-06-23 and nothing noticed for over two months. *Host not
 reporting* is the rule that would have caught it.
+
+*msze-collector nightly heartbeat stale* is the only rule not backed by
+InfluxDB: it reads the collector's `/health` JSON through the Infinity
+datasource (uid `msze-infinity`, `http://127.0.0.1:8091/health`) using the
+`infinity_query` helper in `catalog.py` (backend parser, `heartbeat_age_h` as a
+number column). `heartbeat_age_h` is `null` until the first nightly run, which
+drops out as no-data and counts as OK, so a fresh deploy stays quiet; a dead
+container is covered by *Container not running*. Apply it only after the
+container exists.
 
 ### Host monitoring / host-resources (5m)
 | rule | fires when | for | severity |

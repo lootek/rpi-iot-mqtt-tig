@@ -47,7 +47,7 @@ HOSTS = ["ithilien", "lothlorien", "rohan", "shire"]
 # that would otherwise each become a phantom "container down" alert.
 EXPECTED_CONTAINERS = {
     "lothlorien": ["grafana", "influxdb", "mosquitto", "mqtt-to-influxdb",
-                   "telegraf", "iot-dht22", "ttss-collector"],
+                   "telegraf", "iot-dht22", "ttss-collector", "msze-collector"],
     "ithilien": ["telegraf", "yt-rpi-player", "iot-dht22"],
     "shire": ["telegraf"],
     "rohan": ["telegraf", "iot-sct013"],
