@@ -1,0 +1,72 @@
+# Church list. Adding a church = add an entry here.
+# ETA ranges are placeholders until supplied; eta_confirmed stays false until then
+# (reported by /health).
+churches:
+  - id: morawica
+    name: Morawica
+    mode: car
+    eta_min: 10  # TODO(Piotr): ETA range
+    eta_max: 15
+    eta_confirmed: false
+    location: Morawica
+    schedule_urls: ["http://www.parafia.morawica.net/"]
+    ogloszenia_urls: ["http://www.parafia.morawica.net/"]
+
+  - id: brzoskwinia
+    name: Brzoskwinia
+    mode: walk
+    eta_min: 10
+    eta_max: 15
+    eta_confirmed: true  # 10-15 min walk, given
+    location: Brzoskwinia
+    schedule_from: morawica  # filia: no own schedule, read from the Morawica page
+    ogloszenia_urls: []
+
+  - id: dominikanie
+    name: Dominikanie
+    mode: car
+    eta_min: 15  # TODO(Piotr): ETA range
+    eta_max: 25
+    eta_confirmed: false
+    schedule_urls: ["https://krakow.dominikanie.pl/sakramenty/msze-swieta/"]
+    ogloszenia_urls: ["https://krakow.dominikanie.pl/kategoria/ogloszenia/"]
+    headers:
+      User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+      Accept-Language: "pl-PL,pl;q=0.9,en;q=0.8"
+
+  - id: olszanica
+    name: Olszanica
+    mode: car
+    eta_min: 10  # TODO(Piotr): ETA range
+    eta_max: 20
+    eta_confirmed: false
+    schedule_urls: ["https://parafiaolszanica.kapucyni.pl/"]
+    ogloszenia_urls: ["https://parafiaolszanica.kapucyni.pl/"]
+
+  - id: mydlniki
+    name: Mydlniki
+    mode: car
+    eta_min: 10  # TODO(Piotr): ETA range
+    eta_max: 20
+    eta_confirmed: false
+    schedule_urls: ["https://mydlniki.diecezja.pl/"]
+    ogloszenia_urls: ["https://mydlniki.diecezja.pl/"]
+
+  - id: karmel
+    name: Karmel
+    mode: car
+    eta_min: 10  # TODO(Piotr): ETA range
+    eta_max: 20
+    eta_confirmed: false
+    schedule_urls: ["https://karmelczerna.pl/msze-sw/"]
+    ogloszenia_urls: ["https://karmelczerna.pl/msze-sw/"]
+
+  - id: bronowice
+    name: Bronowice
+    mode: car
+    eta_min: 15  # TODO(Piotr): ETA range
+    eta_max: 25
+    eta_confirmed: false
+    schedule_urls: ["https://franciszkaniebronowice.pl/"]
+    ogloszenia_urls: ["https://franciszkaniebronowice.pl/"]
