@@ -69,4 +69,8 @@ churches:
     eta_max: 25
     eta_confirmed: false
     schedule_urls: ["https://franciszkaniebronowice.pl/"]
+    # Weekly ogłoszenia are HTML pages (/ogloszenia/<slug>,<id>), the latest one inlined
+    # on the homepage with a "Poprzednie ogłoszenia" list. The parish newsletter PDF
+    # ("Nie samym chlebem", /photos/*.pdf) is a rare issue, not weekly, so it is not followed.
     ogloszenia_urls: ["https://franciszkaniebronowice.pl/"]
+    bulletin_link_regex: '/ogloszenia/[^/]+,\d+$'
