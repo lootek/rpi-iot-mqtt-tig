@@ -20,6 +20,7 @@ REG_DROP_DAYS = 30
 
 BADGE_ASSUMED = "sezon: zakładam"
 BADGE_NO_DATA = "brak danych"
+BADGE_NO_BULLETINS = "bez ogłoszeń"
 
 
 def _hm(value) -> str | None:
@@ -158,7 +159,10 @@ def build_rows(now: datetime, churches: list[Church], cache: dict, hours: int = 
         if reg_age > timedelta(days=REG_STALE_DAYS):
             stale.append(f"rozkład sprzed {reg_age.days} dni")
         exc_age = _age(exc.get("fetched_at"), now)
-        if exc_age is not None and exc_age > timedelta(days=EXC_STALE_DAYS):
+        if exc_age is None:
+            # never read: absence of one-off changes must not look like "none exist"
+            stale.append(BADGE_NO_BULLETINS)
+        elif exc_age > timedelta(days=EXC_STALE_DAYS):
             stale.append(f"bez ogłoszeń od {exc_age.days} dni")
         excs = exc.get("entries") or []
 

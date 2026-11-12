@@ -232,6 +232,27 @@ def test_stale_exceptions_badge_after_3_days():
     assert stale[0]["status"] == "ok"
 
 
+def test_never_fetched_exceptions_get_bez_ogloszen_badge():
+    now = datetime(2026, 11, 12, 6, 0, tzinfo=WAW)
+    ent = [e("thu", "07:00")]
+    # exceptions part present but never fetched
+    c1 = cache(regular=ent, now=now)
+    c1["sources"]["morawica"]["exceptions"]["fetched_at"] = None
+    # source without any exceptions part
+    c2 = cache(regular=ent, now=now)
+    del c2["sources"]["morawica"]["exceptions"]
+    for c in (c1, c2):
+        rows = build_rows(now, [church()], c)
+        assert rows[0]["status"] == "ok"
+        assert "bez ogłoszeń" in rows[0]["badges"]
+
+
+def test_fetched_exceptions_no_badge_within_3_days():
+    now = datetime(2026, 11, 12, 6, 0, tzinfo=WAW)
+    r = build_rows(now, [church()], cache(regular=[e("thu", "07:00")], now=now, exc_age=2))[0]
+    assert "bez ogłoszeń" not in r["badges"]
+
+
 def test_stale_regular_badge_after_14_days():
     now = datetime(2026, 11, 12, 6, 0, tzinfo=WAW)
     ent = [e("thu", "07:00")]
