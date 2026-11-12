@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import hashlib
 import io
+import ipaddress
 import re
+import socket
 from dataclasses import dataclass
 from html.parser import HTMLParser
 from typing import Literal
@@ -15,6 +17,8 @@ from pypdf import PdfReader, PdfWriter
 DEFAULT_BULLETIN_REGEX = r"ogłoszen|ogloszen|\.pdf$"
 TEXT_LAYER_MIN_CHARS = 200
 _CHUNK = 64 * 1024
+MAX_REDIRECTS = 5
+_REDIRECT_CODES = {301, 302, 303, 307, 308}
 
 
 class FetchError(Exception):
@@ -109,6 +113,24 @@ class _AnchorCollector(HTMLParser):
         self._text = []
 
 
+def _host_key(url: str) -> str | None:
+    """Lowercased hostname without trailing dot or leading `www.`; None for non-http(s) URLs."""
+    try:
+        u = urlparse(url)
+        host = u.hostname
+    except ValueError:
+        return None
+    if u.scheme.lower() not in ("http", "https") or not host:
+        return None
+    host = host.lower().rstrip(".")
+    return host[4:] if host.startswith("www.") else host
+
+
+def _same_site(url: str, base_url: str) -> bool:
+    key = _host_key(url)
+    return key is not None and key == _host_key(base_url)
+
+
 def find_bulletin_links(listing_html: str, base_url: str, regex: str | None = None, limit: int = 2) -> list[str]:
     """Absolute URLs of anchors on a listing page whose href or text matches `regex`
     (case-insensitive; default: ogłoszenia or a .pdf href).
@@ -117,6 +139,9 @@ def find_bulletin_links(listing_html: str, base_url: str, regex: str | None = No
     (base_url) and fragment/javascript/mailto links are skipped. Whether the live
     listing is ordered newest-first or oldest-first is the caller's business: this
     function does not sort, so a caller that needs "latest" must pick accordingly.
+
+    Links are untrusted: only http/https links on the same host as `base_url`
+    (a leading `www.` counts as equivalent) are kept.
     """
     pat = re.compile(regex or DEFAULT_BULLETIN_REGEX, re.IGNORECASE)
     parser = _AnchorCollector()
@@ -131,6 +156,8 @@ def find_bulletin_links(listing_html: str, base_url: str, regex: str | None = No
         if not (pat.search(href) or pat.search(text)):
             continue
         absolute = urldefrag(urljoin(base_url, href))[0]
+        if not _same_site(absolute, base_url):
+            continue
         if absolute == self_url or absolute in out:
             continue
         out.append(absolute)
@@ -195,16 +222,66 @@ def _pdf_doc(url: str, body: bytes, sha: str, max_pages: int) -> Doc:
     return Doc(url, "pdf", text, pdf_bytes, sha)
 
 
+def _check_public(url: str, resolver) -> None:
+    """Raise FetchError unless `url` is http(s) and every address its host resolves to is public."""
+    try:
+        u = urlparse(url)
+        host, port = u.hostname, u.port
+    except ValueError as e:
+        raise FetchError(f"{url}: invalid URL") from e
+    if u.scheme.lower() not in ("http", "https") or not host:
+        raise FetchError(f"{url}: refusing non-http(s) URL")
+    try:
+        infos = resolver(host, port or (443 if u.scheme.lower() == "https" else 80))
+    except OSError as e:  # socket.gaierror is an OSError
+        raise FetchError(f"{url}: cannot resolve {host}: {e}") from e
+    if not infos:
+        raise FetchError(f"{url}: {host} did not resolve")
+    for info in infos:
+        raw = str(info[4][0]).split("%", 1)[0]
+        try:
+            ip = ipaddress.ip_address(raw)
+        except ValueError as e:
+            raise FetchError(f"{url}: unparseable address {raw!r}") from e
+        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+            ip = ip.ipv4_mapped
+        if (ip.is_loopback or ip.is_private or ip.is_link_local or ip.is_unspecified
+                or ip.is_multicast or ip.is_reserved or not ip.is_global):
+            raise FetchError(f"{url}: {host} resolves to non-public address {ip}")
+
+
 def fetch_doc(url: str, headers: dict | None = None, session=None, timeout: int = 30,
-              max_bytes: int = 5_000_000, max_pages: int = 8) -> Doc:
+              max_bytes: int = 5_000_000, max_pages: int = 8, resolver=None) -> Doc:
     """GET `url` and return an HTML or PDF Doc. Raises FetchError on network/HTTP
     errors, oversize bodies and unreadable PDFs. Only the first `max_pages` pages of
-    a PDF are read (and, for image-only PDFs, kept in `pdf_bytes`)."""
+    a PDF are read (and, for image-only PDFs, kept in `pdf_bytes`).
+
+    SSRF guard: every request (including each redirect hop) must be http(s) and the
+    host must resolve only to public addresses. Redirects are followed manually, at
+    most MAX_REDIRECTS hops, and must stay on the original host (www-equivalent)."""
     session = session or requests.Session()
-    try:
-        resp = session.get(url, headers=headers or {}, timeout=timeout, stream=True)
-    except requests.RequestException as e:
-        raise FetchError(f"{url}: {e}") from e
+    resolver = resolver or socket.getaddrinfo
+    original = url
+    resp = None
+    for hop in range(MAX_REDIRECTS + 1):
+        if hop and not _same_site(url, original):
+            raise FetchError(f"{original}: redirect to other host {url}")
+        _check_public(url, resolver)
+        try:
+            resp = session.get(url, headers=headers or {}, timeout=timeout, stream=True, allow_redirects=False)
+        except requests.RequestException as e:
+            raise FetchError(f"{url}: {e}") from e
+        if resp.status_code not in _REDIRECT_CODES:
+            break
+        location = resp.headers.get("Location")
+        close = getattr(resp, "close", None)
+        if close:
+            close()
+        if not location:
+            raise FetchError(f"{url}: HTTP {resp.status_code} without Location")
+        if hop == MAX_REDIRECTS:
+            raise FetchError(f"{original}: more than {MAX_REDIRECTS} redirects")
+        url = urljoin(url, location)
     try:
         if resp.status_code >= 400:
             raise FetchError(f"{url}: HTTP {resp.status_code}")

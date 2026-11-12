@@ -10,6 +10,19 @@ from config import load_churches
 from fetch import Doc, FetchError, fetch_doc, find_bulletin_links, html_to_text
 
 FIX = Path(__file__).parent / "fixtures"
+PUBLIC = "93.184.216.34"
+
+
+def resolves_to(*ips):
+    def resolver(host, port, *a, **kw):
+        return [(2, 1, 6, "", (ip, port or 0)) for ip in ips]
+    return resolver
+
+
+@pytest.fixture(autouse=True)
+def _public_dns(monkeypatch):
+    """Existing fetch tests use fake sessions and made-up hosts: resolve them all to a public IP."""
+    monkeypatch.setattr("fetch.socket.getaddrinfo", resolves_to(PUBLIC))
 CHURCHES = Path(__file__).parent.parent / "churches.yaml"
 
 
@@ -35,10 +48,13 @@ class FakeSession:
         self.exc = exc
         self.calls = []
 
-    def get(self, url, headers=None, timeout=None, stream=False):
+    def get(self, url, headers=None, timeout=None, stream=False, allow_redirects=True):
         self.calls.append({"url": url, "headers": headers, "timeout": timeout})
+        self.allow_redirects = allow_redirects
         if self.exc:
             raise self.exc
+        if isinstance(self.response, list):  # one response per request, in order
+            return self.response.pop(0)
         return self.response
 
 
@@ -228,3 +244,124 @@ def test_fetch_http_error_raises_fetcherror():
         fetch_doc("https://example.org/", {}, session=FakeSession(exc=requests.ConnectionError("boom")))
     with pytest.raises(FetchError, match="PDF"):
         fetch_doc("https://example.org/x.pdf", {}, session=FakeSession(FakeResponse(b"%PDF-1.4 garbage", content_type="application/pdf")))
+
+
+# ------------------------------------------------------- SSRF: link discovery
+
+
+def test_links_to_other_hosts_are_dropped():
+    html = (
+        '<a href="http://127.0.0.1:8086/ogloszenia">Ogłoszenia</a>'
+        '<a href="https://evil.example/ogloszenia.pdf">x</a>'
+        '<a href="//192.168.1.1/a.pdf">y</a>'
+        '<a href="https://example.org.evil.example/a.pdf">z</a>'
+        '<a href="/ogloszenia/1">ok</a>'
+    )
+    assert find_bulletin_links(html, "https://example.org/", limit=500) == ["https://example.org/ogloszenia/1"]
+
+
+def test_links_with_non_http_schemes_dropped():
+    html = (
+        '<a href="ftp://example.org/ogloszenia.pdf">a</a>'
+        '<a href="file:///etc/passwd.pdf">b</a>'
+        '<a href="data:text/html,ogloszenia">c</a>'
+        '<a href="gopher://example.org/ogloszenia">d</a>'
+        '<a href="http://example.org/ogloszenia/2">ok</a>'
+    )
+    assert find_bulletin_links(html, "https://example.org/", limit=500) == ["http://example.org/ogloszenia/2"]
+
+
+def test_www_variant_same_host_kept():
+    html = '<a href="https://www.example.org/ogloszenia/1">a</a><a href="https://EXAMPLE.org./ogloszenia/2">b</a>'
+    assert len(find_bulletin_links(html, "https://example.org/", limit=500)) == 2
+    html = '<a href="https://example.org/ogloszenia/3">a</a>'
+    assert find_bulletin_links(html, "https://www.example.org/x", limit=500) == ["https://example.org/ogloszenia/3"]
+
+
+# ------------------------------------------------------- SSRF: fetch validation
+
+
+@pytest.mark.parametrize("ip", ["127.0.0.1", "::1"])
+def test_fetch_rejects_loopback(ip):
+    sess = FakeSession(FakeResponse(b"secret"))
+    with pytest.raises(FetchError):
+        fetch_doc("http://example.org/", {}, session=sess, resolver=resolves_to(ip))
+    assert sess.calls == []
+
+
+@pytest.mark.parametrize("ip", ["10.0.0.5", "172.17.0.1", "192.168.1.10"])
+def test_fetch_rejects_private_rfc1918(ip):
+    sess = FakeSession(FakeResponse(b"secret"))
+    with pytest.raises(FetchError):
+        fetch_doc("http://example.org/", {}, session=sess, resolver=resolves_to(ip))
+    assert sess.calls == []
+
+
+def test_fetch_rejects_link_local_metadata_ip():
+    sess = FakeSession(FakeResponse(b"secret"))
+    with pytest.raises(FetchError):
+        fetch_doc("http://169.254.169.254/latest/meta-data/", {}, session=sess, resolver=resolves_to("169.254.169.254"))
+    assert sess.calls == []
+
+
+def test_fetch_rejects_host_resolving_to_private_among_public():
+    sess = FakeSession(FakeResponse(b"secret"))
+    with pytest.raises(FetchError):
+        fetch_doc("http://example.org/", {}, session=sess, resolver=resolves_to(PUBLIC, "10.1.2.3"))
+    assert sess.calls == []
+
+
+@pytest.mark.parametrize("url", ["ftp://example.org/a", "file:///etc/passwd", "gopher://example.org/"])
+def test_fetch_rejects_non_http_scheme(url):
+    sess = FakeSession(FakeResponse(b"x"))
+    with pytest.raises(FetchError):
+        fetch_doc(url, {}, session=sess, resolver=resolves_to(PUBLIC))
+    assert sess.calls == []
+
+
+def test_fetch_rejects_unresolvable_host():
+    def boom(host, port, *a, **kw):
+        raise OSError("nxdomain")
+    with pytest.raises(FetchError):
+        fetch_doc("http://example.org/", {}, session=FakeSession(FakeResponse(b"x")), resolver=boom)
+
+
+def redirect(location, status=302):
+    return FakeResponse(b"", status=status, headers={"Location": location})
+
+
+def test_redirect_to_private_ip_rejected():
+    def resolver(host, port, *a, **kw):
+        return resolves_to("192.168.1.1" if host == "www.example.org" else PUBLIC)(host, port)
+    sess = FakeSession([redirect("https://www.example.org/x")])
+    with pytest.raises(FetchError):
+        fetch_doc("https://example.org/", {}, session=sess, resolver=resolver)
+    assert [c["url"] for c in sess.calls] == ["https://example.org/"]
+
+
+def test_redirect_to_other_host_rejected():
+    sess = FakeSession([redirect("http://127.0.0.1:8086/")])
+    with pytest.raises(FetchError):
+        fetch_doc("https://example.org/", {}, session=sess, resolver=resolves_to(PUBLIC))
+    sess = FakeSession([redirect("https://evil.example/")])  # public, but a different host
+    with pytest.raises(FetchError):
+        fetch_doc("https://example.org/", {}, session=sess, resolver=resolves_to(PUBLIC))
+    assert len(sess.calls) == 1
+
+
+def test_redirect_chain_over_five_hops_rejected():
+    sess = FakeSession([redirect(f"/r{i}") for i in range(1, 7)] + [FakeResponse(b"<p>end</p>")])
+    with pytest.raises(FetchError):
+        fetch_doc("https://example.org/", {}, session=sess, resolver=resolves_to(PUBLIC))
+    ok = FakeSession([redirect(f"/r{i}") for i in range(1, 6)] + [FakeResponse(b"<p>end</p>")])
+    assert fetch_doc("https://example.org/", {}, session=ok, resolver=resolves_to(PUBLIC)).text == "end"
+
+
+def test_redirect_same_host_followed():
+    sess = FakeSession([redirect("/new", 301), redirect("https://www.example.org/final", 307), FakeResponse(b"<p>hi</p>")])
+    doc = fetch_doc("https://example.org/old", {"X": "1"}, session=sess, resolver=resolves_to(PUBLIC))
+    assert doc.text == "hi"
+    assert [c["url"] for c in sess.calls] == [
+        "https://example.org/old", "https://example.org/new", "https://www.example.org/final"]
+    assert sess.allow_redirects is False
+    assert all(c["headers"] == {"X": "1"} for c in sess.calls)
