@@ -1,0 +1,14 @@
+[Unit]
+Description=Publish DHT22 temperature/humidity to MQTT
+After=network-online.target pigpiod.service
+Wants=network-online.target
+Requires=pigpiod.service
+
+[Service]
+Environment=DHT22_PIN=17
+ExecStart=/opt/dht22/bin/python -u /opt/dht22/dht22.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

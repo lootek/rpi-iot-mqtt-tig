@@ -1,0 +1,3 @@
+# paho 1.x: dht22.py uses the 1.x callback signatures
+paho-mqtt==1.6.1
+pigpio
