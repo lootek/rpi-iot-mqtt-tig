@@ -343,8 +343,8 @@ def _note(text):
 
 def test_note_gets_sw_after_msza_forms():
     assert _note("Msza o 18:00") == "Msza św. o 18:00"
-    assert _note("odwołanie Mszy o 9:00".replace("Mszy", "Mszy")) == "odwołanie Mszy św. o 9:00"
-    assert _note("dodatkowa Mszę o 20:00".replace("Mszę", "Mszę")) == "dodatkowa Mszę św. o 20:00"
+    assert _note("odwołanie Mszy o 9:00") == "odwołanie Mszy św. o 9:00"
+    assert _note("dodatkowa Mszę o 20:00") == "dodatkowa Mszę św. o 20:00"
     assert _note("Msze: 7:00 i 9:00") == "Msze św.: 7:00 i 9:00"
     assert _note("Mszom i Mszach") == "Mszom św. i Mszach św."
 
