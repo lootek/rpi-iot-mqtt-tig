@@ -54,3 +54,8 @@ def test_eta_min_not_above_eta_max_rejected(tmp_path):
 def test_unknown_mode_rejected(tmp_path):
     with pytest.raises(ValueError):
         load_churches(_write(tmp_path, _church_yaml(mode="bike")))
+
+
+def test_dominikanie_schedule_url():
+    c = {c.id: c for c in load_churches(REAL)}["dominikanie"]
+    assert list(c.schedule_urls) == ["https://krakow.dominikanie.pl/sakramenty/msza-swieta/"]

@@ -27,7 +27,7 @@ churches:
     eta_min: 40
     eta_max: 60
     eta_confirmed: true
-    schedule_urls: ["https://krakow.dominikanie.pl/sakramenty/msze-swieta/"]
+    schedule_urls: ["https://krakow.dominikanie.pl/sakramenty/msza-swieta/"]
     ogloszenia_urls: ["https://krakow.dominikanie.pl/kategoria/ogloszenia/"]
     headers:
       User-Agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
