@@ -23,6 +23,15 @@ def resolves_to(*ips):
 def _public_dns(monkeypatch):
     """Existing fetch tests use fake sessions and made-up hosts: resolve them all to a public IP."""
     monkeypatch.setattr("fetch.socket.getaddrinfo", resolves_to(PUBLIC))
+
+
+@pytest.fixture(autouse=True)
+def _no_real_sleep(monkeypatch):
+    """Throttle/backoff must never actually sleep in tests; start each test with a clean host table."""
+    monkeypatch.setattr("fetch.time.sleep", lambda s: None)
+    monkeypatch.setattr("fetch._last_request", {})
+
+
 CHURCHES = Path(__file__).parent.parent / "churches.yaml"
 
 
@@ -365,3 +374,101 @@ def test_redirect_same_host_followed():
         "https://example.org/old", "https://example.org/new", "https://www.example.org/final"]
     assert sess.allow_redirects is False
     assert all(c["headers"] == {"X": "1"} for c in sess.calls)
+
+
+# ------------------------------------------------------ politeness throttle / 429
+
+
+class FakeClock:
+    """Monotonic clock that advances when the injected sleep is called."""
+    def __init__(self):
+        self.t = 1000.0
+        self.sleeps = []
+
+    def __call__(self):
+        return self.t
+
+    def sleep(self, s):
+        self.sleeps.append(s)
+        self.t += s
+
+
+def _get(url, sess, clk, **kw):
+    return fetch_doc(url, {}, session=sess, sleep=clk.sleep, clock=clk, **kw)
+
+
+def test_same_host_requests_are_spaced():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"a"), FakeResponse(b"b"), FakeResponse(b"c")])
+    _get("https://example.org/1", sess, clk)
+    assert clk.sleeps == []
+    _get("https://example.org/2", sess, clk)
+    assert clk.sleeps == [pytest.approx(1.5)]
+    clk.t += 0.5
+    _get("https://www.example.org/3", sess, clk)  # www-equivalent host counts as the same host
+    assert clk.sleeps[1:] == [pytest.approx(1.0)]
+
+
+def test_different_hosts_not_throttled_against_each_other():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"a"), FakeResponse(b"b")])
+    _get("https://example.org/", sess, clk)
+    _get("https://example.net/", sess, clk)
+    assert clk.sleeps == []
+
+
+def test_429_retried_once_after_retry_after():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"slow", status=429, headers={"Retry-After": "7"}), FakeResponse(b"ok")])
+    doc = _get("https://example.org/", sess, clk)
+    assert doc.text == "ok"
+    assert len(sess.calls) == 2
+    assert clk.sleeps == [7]
+
+
+def test_429_without_header_uses_default_5s():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=429), FakeResponse(b"ok")])
+    assert _get("https://example.org/", sess, clk).text == "ok"
+    assert clk.sleeps == [5]
+
+
+def test_503_with_retry_after_retried_but_without_is_not():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=503, headers={"Retry-After": "2"}), FakeResponse(b"ok")])
+    assert _get("https://example.org/", sess, clk).text == "ok"
+    assert clk.sleeps == [2]
+    clk2 = FakeClock()
+    sess2 = FakeSession([FakeResponse(b"", status=503)])
+    with pytest.raises(FetchError, match="503"):
+        _get("https://example.net/", sess2, clk2)
+    assert len(sess2.calls) == 1
+
+
+def test_429_twice_raises_fetcherror():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=429), FakeResponse(b"", status=429), FakeResponse(b"never")])
+    with pytest.raises(FetchError, match="429"):
+        _get("https://example.org/", sess, clk)
+    assert len(sess.calls) == 2
+
+
+def test_retry_after_capped_at_30s():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=429, headers={"Retry-After": "3600"}), FakeResponse(b"ok")])
+    _get("https://example.org/", sess, clk)
+    assert clk.sleeps == [30]
+
+
+def test_non_integer_retry_after_falls_back_to_default():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=429, headers={"Retry-After": "Wed, 21 Oct 2026 07:28:00 GMT"}), FakeResponse(b"ok")])
+    _get("https://example.org/", sess, clk)
+    assert clk.sleeps == [5]
+
+
+def test_redirect_hops_are_throttled_too():
+    clk = FakeClock()
+    sess = FakeSession([FakeResponse(b"", status=302, headers={"Location": "/new"}), FakeResponse(b"ok")])
+    _get("https://example.org/old", sess, clk)
+    assert clk.sleeps == [pytest.approx(1.5)]

@@ -6,6 +6,8 @@ import io
 import ipaddress
 import re
 import socket
+import threading
+import time
 from dataclasses import dataclass
 from html.parser import HTMLParser
 from typing import Literal
@@ -19,6 +21,12 @@ TEXT_LAYER_MIN_CHARS = 200
 _CHUNK = 64 * 1024
 MAX_REDIRECTS = 5
 _REDIRECT_CODES = {301, 302, 303, 307, 308}
+DEFAULT_MIN_INTERVAL = 1.5  # seconds between requests to the same host
+DEFAULT_RETRY_AFTER = 5
+MAX_RETRY_AFTER = 30
+
+_throttle_lock = threading.Lock()
+_last_request: dict[str, float] = {}  # host key -> clock time of the last (reserved) request
 
 
 class FetchError(Exception):
@@ -250,15 +258,48 @@ def _check_public(url: str, resolver) -> None:
             raise FetchError(f"{url}: {host} resolves to non-public address {ip}")
 
 
+def _throttle(url: str, min_interval: float, sleep, clock) -> None:
+    """Block until at least `min_interval` seconds have passed since the previous
+    request to the same host (www-equivalent) in this process."""
+    key = _host_key(url) or url
+    with _throttle_lock:
+        now = clock()
+        last = _last_request.get(key)
+        wait = max(0.0, last + min_interval - now) if last is not None else 0.0
+        _last_request[key] = now + wait  # reserve the slot so concurrent callers queue up
+    if wait > 0:
+        sleep(wait)
+
+
+def _retry_delay(resp) -> float | None:
+    """Seconds to wait before the single retry, or None if the response is not retryable.
+    429 always qualifies (default 5s); 503 only with a Retry-After header.
+    Retry-After is honoured as integer seconds only, capped at MAX_RETRY_AFTER."""
+    if resp.status_code not in (429, 503):
+        return None
+    raw = (resp.headers.get("Retry-After") or "").strip()
+    if resp.status_code == 503 and not raw:
+        return None
+    delay = int(raw) if raw.isdigit() else DEFAULT_RETRY_AFTER
+    return min(delay, MAX_RETRY_AFTER)
+
+
 def fetch_doc(url: str, headers: dict | None = None, session=None, timeout: int = 30,
-              max_bytes: int = 5_000_000, max_pages: int = 8, resolver=None) -> Doc:
+              max_bytes: int = 5_000_000, max_pages: int = 8, resolver=None,
+              min_interval: float = DEFAULT_MIN_INTERVAL, sleep=None, clock=None) -> Doc:
     """GET `url` and return an HTML or PDF Doc. Raises FetchError on network/HTTP
     errors, oversize bodies and unreadable PDFs. Only the first `max_pages` pages of
     a PDF are read (and, for image-only PDFs, kept in `pdf_bytes`).
 
     SSRF guard: every request (including each redirect hop) must be http(s) and the
     host must resolve only to public addresses. Redirects are followed manually, at
-    most MAX_REDIRECTS hops, and must stay on the original host (www-equivalent)."""
+    most MAX_REDIRECTS hops, and must stay on the original host (www-equivalent).
+
+    Politeness: consecutive requests to one host are spaced by `min_interval` seconds
+    (process-wide), and an HTTP 429 (or 503 with Retry-After) is retried once after
+    the advertised delay. `sleep`/`clock` default to time.sleep/time.monotonic."""
+    sleep = sleep or time.sleep
+    clock = clock or time.monotonic
     session = session or requests.Session()
     resolver = resolver or socket.getaddrinfo
     original = url
@@ -267,10 +308,19 @@ def fetch_doc(url: str, headers: dict | None = None, session=None, timeout: int 
         if hop and not _same_site(url, original):
             raise FetchError(f"{original}: redirect to other host {url}")
         _check_public(url, resolver)
-        try:
-            resp = session.get(url, headers=headers or {}, timeout=timeout, stream=True, allow_redirects=False)
-        except requests.RequestException as e:
-            raise FetchError(f"{url}: {e}") from e
+        for attempt in (0, 1):
+            _throttle(url, min_interval, sleep, clock)
+            try:
+                resp = session.get(url, headers=headers or {}, timeout=timeout, stream=True, allow_redirects=False)
+            except requests.RequestException as e:
+                raise FetchError(f"{url}: {e}") from e
+            delay = _retry_delay(resp)
+            if delay is None or attempt:
+                break
+            close = getattr(resp, "close", None)
+            if close:
+                close()
+            sleep(delay)
         if resp.status_code not in _REDIRECT_CODES:
             break
         location = resp.headers.get("Location")
