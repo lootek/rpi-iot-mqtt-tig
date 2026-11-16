@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provision the Msze Infinity datasource, the Misc folder and the
+"""Provision the Msze św. Infinity datasource, the Misc folder and the
 "Msze św." dashboard into Grafana on lothlorien.
 
 stdlib only (urllib) so it runs from any laptop without a repo venv:
@@ -23,7 +23,7 @@ TOKEN_PATH = os.path.expanduser(os.environ.get("GRAFANA_TOKEN_FILE", "~/.secrets
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 DATASOURCE = {
-    "name": "Msze Infinity",
+    "name": "Msze św. Infinity",
     "type": "yesoreyeram-infinity-datasource",
     "uid": "msze-infinity",
     "access": "proxy",
@@ -76,14 +76,17 @@ def ensure_datasource():
         print(f"datasource msze-infinity created (HTTP {code})")
     else:
         expect("lookup datasource", code, body)
-        current = json.loads(body).get("jsonData") or {}
-        if current.get("allowedHosts") == DATASOURCE["jsonData"]["allowedHosts"]:
-            print("datasource msze-infinity already present, allowedHosts up to date")
+        existing = json.loads(body)
+        current = existing.get("jsonData") or {}
+        hosts_ok = current.get("allowedHosts") == DATASOURCE["jsonData"]["allowedHosts"]
+        name_ok = existing.get("name") == DATASOURCE["name"]
+        if hosts_ok and name_ok:
+            print("datasource msze-infinity already present, name and allowedHosts up to date")
         else:
-            # Repair older creates that predate the allowedHosts allowlist.
+            # Repair older creates: missing allowedHosts allowlist or an outdated display name.
             code, body = call("PUT", "/api/datasources/uid/msze-infinity", DATASOURCE)
             expect("update datasource", code, body)
-            print(f"datasource msze-infinity updated with allowedHosts (HTTP {code})")
+            print(f"datasource msze-infinity updated (name/allowedHosts) (HTTP {code})")
     verify_allowed_hosts()
 
 

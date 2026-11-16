@@ -39,7 +39,7 @@
             "inspect": false
           },
           "mappings": [],
-          "noValue": "Brak Mszy w najbliższych 3 h",
+          "noValue": "Brak Mszy św. w najbliższych 3 h",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -348,7 +348,7 @@
           }
         }
       ],
-      "title": "Najbliższe Msze",
+      "title": "Najbliższe Msze św.",
       "type": "table"
     }
   ],

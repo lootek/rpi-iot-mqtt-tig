@@ -24,7 +24,7 @@ def test_dashboard_json_shape():
     assert p["type"] == "table"
     assert p["gridPos"]["w"] == 24
     assert p["datasource"]["uid"] == "msze-infinity"
-    assert p["fieldConfig"]["defaults"]["noValue"] == "Brak Mszy w najbliższych 3 h"
+    assert p["fieldConfig"]["defaults"]["noValue"] == "Brak Mszy św. w najbliższych 3 h"
     assert p["options"].get("sortBy") in (None, [])  # keep API order
     assert p["options"].get("enablePagination") is False
     (t,) = p["targets"]
@@ -46,6 +46,12 @@ def test_provision_script_asserts_allowed_hosts():
     assert 'allowed != DATASOURCE["jsonData"]["allowedHosts"]' in text
     assert "sys.exit(1)" in text
     assert "overwrite" in text
+    assert '"name": "Msze św. Infinity"' in text
+    assert 'existing.get("name") == DATASOURCE["name"]' in text  # rename triggers PUT
+
+
+def test_panel_title_has_sw():
+    assert _panel()["title"] == "Najbliższe Msze św."
 
 
 def test_all_target_columns_declared():

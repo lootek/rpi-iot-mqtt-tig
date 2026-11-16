@@ -332,3 +332,28 @@ def test_text_layer_pdf_sent_as_text_part():
     extract_exceptions(llm, "K", [doc], TODAY)
     assert all(p["type"] == "text" for p in llm.calls[0]["parts"])
     assert "Ogłoszenia" in "".join(p["text"] for p in llm.calls[0]["parts"])
+
+
+# ------------------------------------------------------------- Msza św. normalizer
+
+
+def _note(text):
+    return validate_exceptions([exc(action="add", time="18:00", note=text)], TODAY)[0]["note"]
+
+
+def test_note_gets_sw_after_msza_forms():
+    assert _note("Msza o 18:00") == "Msza św. o 18:00"
+    assert _note("odwołanie Mszy o 9:00".replace("Mszy", "Mszy")) == "odwołanie Mszy św. o 9:00"
+    assert _note("dodatkowa Mszę o 20:00".replace("Mszę", "Mszę")) == "dodatkowa Mszę św. o 20:00"
+    assert _note("Msze: 7:00 i 9:00") == "Msze św.: 7:00 i 9:00"
+    assert _note("Mszom i Mszach") == "Mszom św. i Mszach św."
+
+
+def test_note_already_abbreviated_unchanged():
+    for t in ("Msza św. o 18:00", "odwołanie Mszy św.", "Mszę św. o 9:00", "Msze św. w niedzielę", "Msze Św. o 9"):
+        assert _note(t) == t
+
+
+def test_note_lowercase_msze_identifier_unchanged():
+    assert _note("zob. msze-collector i msze-data") == "zob. msze-collector i msze-data"
+    assert _note("https://x.example/msze/") == "https://x.example/msze/"

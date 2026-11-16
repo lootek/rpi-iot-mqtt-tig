@@ -86,7 +86,8 @@ pomijaj wszystko, co już minęło oraz zmiany bez konkretnej daty.
   - move: przeniesiona Msza (`time` = dotychczasowa godzina, `new_time` = nowa godzina).
 - `scope`: "one" dla zmiany pojedynczej Mszy, "all_that_day" tylko dla odwołania całego dnia.
 - `location`: miejscowość, jeśli ogłoszenie ją wskazuje, inaczej null.
-- `note`: krótka notatka po polsku z cytatem źródła.
+- `note`: krótka notatka po polsku z cytatem źródła. W polu note zawsze pisz "Msza św.",
+  "Mszy św.", "Mszę św.", "Msze św." (z "św."), nie samo "Msza".
 - POMIJAJ Msze pogrzebowe ("Msza pogrzebowa śp. ..."), Msze ślubne oraz Msze odprawiane
   w prywatnej, imiennej intencji lub okazji (np. za konkretną osobę, rocznica, jubileusz
   rodziny). To nie są Msze, pod które planuje publiczność.
@@ -274,6 +275,16 @@ def _is_private_add(e: dict) -> bool:
                     for k in ("note", "quote")))
 
 
+# User-visible text always spells the abbreviation: "Msza św.", "Mszy św." ... Case-sensitive
+# on the leading M so lowercase identifiers ("msze-collector") are never touched; text that
+# already has "św." after the word is left alone.
+_MSZA_RE = re.compile(r"\b(Msz(?:a|y|ę|e|om|ami|ach|o))\b(?!\s+[Śś]w\.)")
+
+
+def _normalize_msza(text: str) -> str:
+    return _MSZA_RE.sub(r"\1 św.", text)
+
+
 def validate_exceptions(entries: list[dict], today: date) -> list[dict]:
     last = today + timedelta(days=EXCEPTION_WINDOW_DAYS)
     out = []
@@ -328,7 +339,7 @@ def validate_exceptions(entries: list[dict], today: date) -> list[dict]:
             "new_time": new_time,
             "scope": scope,
             "location": _clean_str(e.get("location")),
-            "note": _clean_str(e.get("note")) or "",
+            "note": _normalize_msza(_clean_str(e.get("note")) or ""),
             "source_url": source_url,
         })
     return out
