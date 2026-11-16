@@ -1,13 +1,12 @@
 # Church list. Adding a church = add an entry here.
-# ETA ranges are placeholders until supplied; eta_confirmed stays false until then
-# (reported by /health).
+# eta_confirmed: false is reported by /health.
 churches:
   - id: morawica
     name: Morawica
     mode: car
-    eta_min: 10  # TODO(Piotr): ETA range
+    eta_min: 8
     eta_max: 15
-    eta_confirmed: false
+    eta_confirmed: true
     location: Morawica
     schedule_urls: ["http://www.parafia.morawica.net/"]
     ogloszenia_urls: ["http://www.parafia.morawica.net/"]
@@ -25,9 +24,9 @@ churches:
   - id: dominikanie
     name: Dominikanie
     mode: car
-    eta_min: 15  # TODO(Piotr): ETA range
-    eta_max: 25
-    eta_confirmed: false
+    eta_min: 40
+    eta_max: 60
+    eta_confirmed: true
     schedule_urls: ["https://krakow.dominikanie.pl/sakramenty/msze-swieta/"]
     ogloszenia_urls: ["https://krakow.dominikanie.pl/kategoria/ogloszenia/"]
     headers:
@@ -38,36 +37,36 @@ churches:
   - id: olszanica
     name: Olszanica
     mode: car
-    eta_min: 10  # TODO(Piotr): ETA range
-    eta_max: 20
-    eta_confirmed: false
+    eta_min: 20
+    eta_max: 30
+    eta_confirmed: true
     schedule_urls: ["https://parafiaolszanica.kapucyni.pl/"]
     ogloszenia_urls: ["https://parafiaolszanica.kapucyni.pl/"]
 
   - id: mydlniki
     name: Mydlniki
     mode: car
-    eta_min: 10  # TODO(Piotr): ETA range
+    eta_min: 15
     eta_max: 20
-    eta_confirmed: false
+    eta_confirmed: true
     schedule_urls: ["https://mydlniki.diecezja.pl/"]
     ogloszenia_urls: ["https://mydlniki.diecezja.pl/"]
 
   - id: karmel
     name: Karmel
     mode: car
-    eta_min: 10  # TODO(Piotr): ETA range
-    eta_max: 20
-    eta_confirmed: false
+    eta_min: 20
+    eta_max: 30
+    eta_confirmed: true
     schedule_urls: ["https://karmelczerna.pl/msze-sw/"]
     ogloszenia_urls: ["https://karmelczerna.pl/msze-sw/"]
 
   - id: bronowice
     name: Bronowice
     mode: car
-    eta_min: 15  # TODO(Piotr): ETA range
-    eta_max: 25
-    eta_confirmed: false
+    eta_min: 20
+    eta_max: 30
+    eta_confirmed: true
     schedule_urls: ["https://franciszkaniebronowice.pl/"]
     # Weekly ogłoszenia are HTML pages (/ogloszenia/<slug>,<id>), the latest one inlined
     # on the homepage with a "Poprzednie ogłoszenia" list. The parish newsletter PDF
