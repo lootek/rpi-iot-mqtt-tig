@@ -193,6 +193,41 @@ def test_validate_exceptions_add_requires_time_and_unknown_action_dropped():
     assert [e["time"] for e in validate_exceptions(entries, TODAY)] == ["18:00"]
 
 
+def test_funeral_add_exception_dropped():
+    funeral = exc(date="2026-11-16", time="11:00", action="add", note="Msza pogrzebowa śp. Jana Kowalskiego")
+    assert validate_exceptions([funeral, exc(action="add", time="18:00", note="Msza dodatkowa")], TODAY)[0]["time"] == "18:00"
+    assert len(validate_exceptions([funeral], TODAY)) == 0
+    by_quote = {**exc(action="add", time="11:00", note="dodatkowa Msza"), "quote": "Pogrzeb śp. Anny"}
+    assert validate_exceptions([by_quote], TODAY) == []
+    assert validate_exceptions([exc(action="add", time="11:00", note="Msza przed POCHÓWKIEM")], TODAY) == []
+
+
+def test_wedding_add_exception_dropped():
+    assert validate_exceptions([exc(action="add", time="16:00", note="Msza ślubna")], TODAY) == []
+    assert validate_exceptions([exc(action="add", time="16:00", note="Msza slubna")], TODAY) == []
+
+
+def test_cancel_mentioning_pogrzeb_kept():
+    cancel = exc(action="cancel", time="09:00", note="Msza o 9:00 odwołana z powodu pogrzebu")
+    move = exc(action="move", time="09:00", new_time="10:30", note="przeniesiona, bo pogrzeb")
+    assert len(validate_exceptions([cancel, move], TODAY)) == 2
+
+
+def test_holiday_add_kept():
+    pasterka = exc(date="2026-11-15", action="add", time="18:00", note="Msza odpustowa ku czci św. Elżbiety")
+    assert len(validate_exceptions([pasterka], TODAY)) == 1
+
+
+def test_funeral_only_bulletin_is_not_an_error():
+    funeral = {k: v for k, v in exc(action="add", time="11:00", note="Msza pogrzebowa śp. X").items() if k != "source_url"}
+    assert extract_exceptions(FakeLLM({"entries": [funeral]}), "K", [html_doc("x")], TODAY) == []
+
+
+def test_exceptions_prompt_excludes_private_masses():
+    from extract import EXCEPTIONS_SYSTEM_PROMPT
+    assert "pogrzebow" in EXCEPTIONS_SYSTEM_PROMPT and "ślubn" in EXCEPTIONS_SYSTEM_PROMPT
+
+
 def test_validate_exceptions_normalizes_scope_and_requires_source_url():
     out = validate_exceptions([exc(scope=None, action="add", time="18:00"),
                                exc(source_url="")], TODAY)

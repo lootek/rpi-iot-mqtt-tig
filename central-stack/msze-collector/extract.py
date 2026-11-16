@@ -87,6 +87,11 @@ pomijaj wszystko, co już minęło oraz zmiany bez konkretnej daty.
 - `scope`: "one" dla zmiany pojedynczej Mszy, "all_that_day" tylko dla odwołania całego dnia.
 - `location`: miejscowość, jeśli ogłoszenie ją wskazuje, inaczej null.
 - `note`: krótka notatka po polsku z cytatem źródła.
+- POMIJAJ Msze pogrzebowe ("Msza pogrzebowa śp. ..."), Msze ślubne oraz Msze odprawiane
+  w prywatnej, imiennej intencji lub okazji (np. za konkretną osobę, rocznica, jubileusz
+  rodziny). To nie są Msze, pod które planuje publiczność.
+- Zwracaj tylko zmiany w publicznym planie Mszy parafii oraz publiczne Msze szczególne
+  (np. święta, odpust, Pasterka, Msze w ramach rekolekcji).
 - Jeśli w dokumencie nie ma żadnych takich zmian, zwróć pustą listę `entries`.
 """
 
@@ -257,6 +262,18 @@ def _valid_exception_time(v, is_pasterka: bool) -> bool:
     return _valid_hm(v) or (is_pasterka and v == "00:00")
 
 
+# Funeral / wedding Masses are private occasions, not something to plan around. A
+# deterministic backstop for the prompt rule; applies to `add` exceptions only (a
+# cancel or move that merely mentions a funeral still matters to the public).
+_PRIVATE_OCCASION_RE = re.compile(r"pogrzeb|ślub|slub|pochówk|pochowk", re.IGNORECASE)
+
+
+def _is_private_add(e: dict) -> bool:
+    return (e.get("action") == "add"
+            and any(isinstance(e.get(k), str) and _PRIVATE_OCCASION_RE.search(e[k])
+                    for k in ("note", "quote")))
+
+
 def validate_exceptions(entries: list[dict], today: date) -> list[dict]:
     last = today + timedelta(days=EXCEPTION_WINDOW_DAYS)
     out = []
@@ -275,6 +292,9 @@ def validate_exceptions(entries: list[dict], today: date) -> list[dict]:
         action = e.get("action")
         if action not in ACTIONS:
             log.info("dropping exception with action %r", action)
+            continue
+        if _is_private_add(e):
+            log.info("dropping private-occasion add on %s", d)
             continue
         time_, new_time, scope = e.get("time"), e.get("new_time"), e.get("scope")
         if time_ is not None and not _valid_exception_time(time_, action == "add" and d.month == 12 and d.day == 25):
@@ -356,7 +376,9 @@ def extract_exceptions(llm, church_name: str, docs: list[Doc], today: date) -> l
         if not parts:
             continue
         raw = _entries(llm.complete_json(system, parts, EXCEPTIONS_SCHEMA))
-        raw_total += len(raw)
+        # funeral/wedding adds are dropped on purpose; they must not turn a bulletin
+        # that only held such Masses into an "all entries invalid" error
+        raw_total += sum(1 for e in raw if not (isinstance(e, dict) and _is_private_add(e)))
         stamped = [{**e, "source_url": doc.url} if isinstance(e, dict) else e for e in raw]
         out.extend(validate_exceptions(stamped, today))
     if raw_total and not out:
