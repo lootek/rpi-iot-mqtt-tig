@@ -59,7 +59,7 @@ container starts without it.
 
 ```sh
 git pull
-docker compose -f central-stack/docker-compose.msze.yml up -d --build
+docker compose -f http-collectors/docker-compose.msze.yml up -d --build
 curl -s localhost:8091/health
 ```
 

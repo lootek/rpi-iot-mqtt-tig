@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/lootek/rpi-iot-mqtt-tig/central-stack/aqicn-ui/internal/state"
+	"github.com/lootek/rpi-iot-mqtt-tig/iot/aqicn/internal/state"
 )
 
 type server struct {

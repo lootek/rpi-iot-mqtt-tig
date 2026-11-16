@@ -7,13 +7,13 @@ services:
   aqicn-ui:
     image: aqicn-ui:latest
     build:
-      context: ./aqicn-ui
+      context: .
       dockerfile: Dockerfile
     container_name: aqicn-ui
     restart: unless-stopped
     ports:
       - "8080:8080"
     volumes:
-      - ../volumes/aqicn:/state
+      - ../../volumes/aqicn:/state
     environment:
       - AQICN_STATE_DIR=/state

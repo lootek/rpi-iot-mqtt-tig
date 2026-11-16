@@ -63,7 +63,7 @@ Fail-open: on a fetch error the last good RT snapshot is served for up to
 
 ```sh
 git pull
-docker compose -f central-stack/docker-compose.ttss.yml up -d --build
+docker compose -f http-collectors/docker-compose.ttss.yml up -d --build
 ```
 
 ## Grafana
