@@ -69,6 +69,11 @@ class Srv:
         self.thread.join(5)
 
 
+@pytest.fixture(autouse=True)
+def _no_window_env(monkeypatch):
+    monkeypatch.delenv("MSZE_WINDOW_HOURS", raising=False)
+
+
 @pytest.fixture
 def serve(tmp_path):
     servers = []
@@ -91,24 +96,26 @@ def test_upcoming_returns_rows_sorted(serve):
     s = serve()
     body, headers = s.json("/upcoming")
     assert headers["Content-Type"] == "application/json; charset=utf-8"
-    assert body["window_hours"] == 3
+    assert body["window_hours"] == 6
     assert body["generated_at"] == NOW.isoformat()
-    assert times(body) == ["17:30", "18:00", "19:30"]
+    assert times(body) == ["17:30", "18:00", "19:30", "20:30", "22:00"]
     assert [r["church"] for r in body["rows"][:3]] == ["Beta", "Alpha", "Beta"]
     # exactly what build_rows computes (no_data row for the church without cache)
-    assert body["rows"] == build_rows(NOW, s.churches, CACHE, 3)
+    assert body["rows"] == build_rows(NOW, s.churches, CACHE, 6)
     assert body["rows"][-1]["status"] == "no_data" and body["rows"][-1]["church"] == "Gamma"
     first = body["rows"][0]
     assert first["leave_in_min"] == 30 - 10 and first["status"] == "ok"
 
 
-def test_upcoming_hours_param_clamped_1_to_12(serve):
+def test_upcoming_hours_param_clamped_1_to_24(serve):
     s = serve()
+    all_five = ["17:30", "18:00", "19:30", "20:30", "22:00"]
     cases = {"1": (1, ["17:30", "18:00"]),
              "0": (1, ["17:30", "18:00"]),
              "-4": (1, ["17:30", "18:00"]),
-             "12": (12, ["17:30", "18:00", "19:30", "20:30", "22:00"]),
-             "99": (12, ["17:30", "18:00", "19:30", "20:30", "22:00"]),
+             "12": (12, all_five),
+             "24": (24, all_five),
+             "99": (24, all_five),
              "4": (4, ["17:30", "18:00", "19:30", "20:30"])}
     for raw, (hours, expected) in cases.items():
         body, _ = s.json(f"/upcoming?hours={raw}")
@@ -116,8 +123,57 @@ def test_upcoming_hours_param_clamped_1_to_12(serve):
         assert times(body) == expected, raw
     for garbage in ("abc", "", "2.5", "1e3"):
         body, _ = s.json(f"/upcoming?hours={garbage}")
-        assert body["window_hours"] == 3, garbage
-        assert times(body) == ["17:30", "18:00", "19:30"], garbage
+        assert body["window_hours"] == 6, garbage
+        assert times(body) == all_five, garbage
+
+
+def test_hours_clamped_to_24(serve):
+    s = serve()
+    body, _ = s.json("/upcoming?hours=25")
+    assert body["window_hours"] == 24
+    body, _ = s.json("/upcoming?hours=1000")
+    assert body["window_hours"] == 24
+
+
+WINDOW_CACHE = {
+    "heartbeat": "2026-11-12T03:00:05+01:00",
+    "sources": {"alpha": {"regular": part([entry("22:00"), entry("00:00", day="fri")]),
+                          "exceptions": part([])}},
+}
+
+
+def test_upcoming_default_window_is_6h(serve):
+    s = serve(cache=WINDOW_CACHE, churches=(ALPHA,))
+    body, _ = s.json("/upcoming")
+    assert body["window_hours"] == 6
+    assert times(body) == ["22:00"]  # 5 h ahead in, 7 h ahead (00:00 Fri) out
+
+
+def test_env_window_hours_overrides_default(serve, monkeypatch):
+    monkeypatch.setenv("MSZE_WINDOW_HOURS", "8")
+    s = serve(cache=WINDOW_CACHE, churches=(ALPHA,))
+    body, _ = s.json("/upcoming")
+    assert body["window_hours"] == 8
+    assert times(body) == ["22:00", "00:00"]
+    monkeypatch.setenv("MSZE_WINDOW_HOURS", "99")
+    assert serve(cache=WINDOW_CACHE, churches=(ALPHA,)).json("/upcoming")[0]["window_hours"] == 24
+
+
+def test_env_garbage_falls_back_to_6(serve, monkeypatch):
+    for garbage in ("abc", "", "0", "-3", "2.5", " "):
+        monkeypatch.setenv("MSZE_WINDOW_HOURS", garbage)
+        body, _ = serve().json("/upcoming")
+        assert body["window_hours"] == 6, garbage
+
+
+def test_hours_param_overrides_env(serve, monkeypatch):
+    monkeypatch.setenv("MSZE_WINDOW_HOURS", "12")
+    s = serve()
+    assert s.json("/upcoming")[0]["window_hours"] == 12
+    body, _ = s.json("/upcoming?hours=2")
+    assert body["window_hours"] == 2
+    assert times(body) == ["17:30", "18:00"]
+    assert s.json("/upcoming?hours=abc")[0]["window_hours"] == 12  # garbage param -> env default
 
 
 def test_upcoming_empty_window_returns_empty_rows_with_200(serve):
@@ -125,7 +181,7 @@ def test_upcoming_empty_window_returns_empty_rows_with_200(serve):
     s = serve(now=late, churches=(ALPHA, BETA))
     status, headers, raw = s.get("/upcoming")
     assert status == 200
-    assert json.loads(raw) == {"generated_at": late.isoformat(), "window_hours": 3, "rows": []}
+    assert json.loads(raw) == {"generated_at": late.isoformat(), "window_hours": 6, "rows": []}
 
 
 def test_upcoming_without_cache_is_200_with_no_data_rows(serve):
@@ -136,11 +192,11 @@ def test_upcoming_without_cache_is_200_with_no_data_rows(serve):
 
 def test_upcoming_reloads_cache_from_disk_per_request(serve):
     s = serve()
-    assert times(s.json("/upcoming")[0]) == ["17:30", "18:00", "19:30"]
+    assert times(s.json("/upcoming?hours=3")[0]) == ["17:30", "18:00", "19:30"]
     changed = json.loads(json.dumps(CACHE))
     changed["sources"]["alpha"]["regular"]["entries"] = [entry("19:00")]
     s.store.save(changed)
-    assert times(s.json("/upcoming")[0]) == ["17:30", "19:00", "19:30"]
+    assert times(s.json("/upcoming?hours=3")[0]) == ["17:30", "19:00", "19:30"]
 
 
 def test_non_ascii_not_escaped(serve):

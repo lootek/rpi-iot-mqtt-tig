@@ -148,7 +148,7 @@ def test_cancel_of_nonexistent_mass_is_ignored(caplog):
 def test_window_is_three_hours_inclusive_of_start_now():
     now = datetime(2026, 11, 12, 8, 0, tzinfo=WAW)
     entries = [e("thu", t) for t in ("07:59", "08:00", "11:00", "11:01")]
-    rows = build_rows(now, [church()], cache(regular=entries, now=now))
+    rows = build_rows(now, [church()], cache(regular=entries, now=now), hours=3)
     assert [r["start_hm"] for r in rows] == ["08:00", "11:00"]
 
 
@@ -195,7 +195,7 @@ def test_dst_change_day_leave_in_correct():
     # autumn: 2026-10-25 03:00 CEST -> 02:00 CET; 01:30 CEST is 23:30 UTC
     now = datetime(2026, 10, 25, 1, 30, tzinfo=WAW)
     excs = [x("2026-10-25", "add", "03:00"), x("2026-10-25", "add", "04:00")]
-    rows = build_rows(now, [church(eta=(10, 15))], cache(exceptions=excs, regular=[e("sun_holiday", "12:00")], now=now))
+    rows = build_rows(now, [church(eta=(10, 15))], cache(exceptions=excs, regular=[e("sun_holiday", "12:00")], now=now), hours=3)
     # 03:00 CET = 02:00 UTC -> 150 real minutes away; 04:00 CET is 210 real minutes away: outside 3 h
     assert [r["start_hm"] for r in rows] == ["03:00"]
     assert rows[0]["leave_in_min"] == 150 - 15

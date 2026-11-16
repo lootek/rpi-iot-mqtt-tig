@@ -9,12 +9,13 @@ LLM at view time.
 ## Endpoints
 
 ```sh
-curl '127.0.0.1:8091/upcoming?hours=3'   # Masses starting within the window
+curl '127.0.0.1:8091/upcoming?hours=6'   # Masses starting within the window
 curl 127.0.0.1:8091/health               # heartbeat, cache ages, config gaps
 ```
 
 `/upcoming` → `{"generated_at", "window_hours", "rows": [...]}`. `hours` is
-clamped to 1..12, default 3 (garbage → 3). Rows are sorted by start time (ties
+clamped to 1..24; when absent or garbage it falls back to `MSZE_WINDOW_HOURS`
+(default 6). Rows are sorted by start time (ties
 by `eta_max`) with `no_data` rows ("brak danych") for churches without a usable
 schedule at the end. An empty window is `rows: []` with HTTP 200. Row keys:
 `start, start_hm, church, mode, eta, eta_min, eta_max, leave_in_min, status
@@ -37,6 +38,7 @@ multi-location pages, `schedule_from` for a filia, per-church HTTP headers.
 | `DATA_DIR` | `/data` | holds `cache.json` (named volume `msze-data`) |
 | `CHURCHES` | `/app/churches.yaml` | |
 | `OPENROUTER_API_KEY` | – | only needed by the scheduler / dry run |
+| `MSZE_WINDOW_HOURS` | `6` | default look-ahead window in hours (1..24; garbage, zero or negative → 6); `?hours=` overrides it |
 | `MSZE_SCHEDULER` | `0` | `1` starts the nightly job (~03:00 Europe/Warsaw) in a daemon thread |
 
 With `MSZE_SCHEDULER=1` but no key the container logs an error and keeps

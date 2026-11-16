@@ -24,12 +24,12 @@ def test_dashboard_json_shape():
     assert p["type"] == "table"
     assert p["gridPos"]["w"] == 24
     assert p["datasource"]["uid"] == "msze-infinity"
-    assert p["fieldConfig"]["defaults"]["noValue"] == "Brak Mszy św. w najbliższych 3 h"
+    assert p["fieldConfig"]["defaults"]["noValue"] == "Brak Mszy św. w wybranym oknie"
     assert p["options"].get("sortBy") in (None, [])  # keep API order
     assert p["options"].get("enablePagination") is False
     (t,) = p["targets"]
     assert t["datasource"]["uid"] == "msze-infinity"
-    assert t["url"] == "http://127.0.0.1:8091/upcoming"
+    assert t["url"] == "http://127.0.0.1:8091/upcoming?hours=${hours}"
     assert t["root_selector"] == "rows"
     assert t["format"] == "table"
     assert [c["selector"] for c in t["columns"]] == [
@@ -51,7 +51,7 @@ def test_provision_script_asserts_allowed_hosts():
 
 
 def test_panel_title_has_sw():
-    assert _panel()["title"] == "Najbliższe Msze św."
+    assert _panel()["title"] == "Najbliższe Msze św. (${hours} h)"
 
 
 def test_all_target_columns_declared():
@@ -65,3 +65,24 @@ def test_all_target_columns_declared():
     for t in p["targets"]:
         referenced |= {f["field"] for f in t.get("filters", [])}
     assert referenced <= declared, referenced - declared
+
+
+def test_dashboard_has_hours_variable_default_6():
+    d = _dashboard()
+    (v,) = [v for v in d["templating"]["list"] if v["name"] == "hours"]
+    assert v["type"] == "custom"
+    assert v["label"] == "Okno (h)"
+    assert v["query"] == "3,6,9,12,24"
+    assert [o["value"] for o in v["options"]] == ["3", "6", "9", "12", "24"]
+    assert v["current"]["value"] == "6"
+    assert [o["value"] for o in v["options"] if o["selected"]] == ["6"]
+    assert not v.get("multi") and not v.get("includeAll")
+    p = _panel()
+    (t,) = p["targets"]
+    assert t["url"].startswith("http://127.0.0.1:8091/")  # allow-list prefix
+    assert "hours=${hours}" in t["url"]
+    assert "3 h" not in p["fieldConfig"]["defaults"]["noValue"]
+    assert "${" not in p["fieldConfig"]["defaults"]["noValue"]
+    declared = {c["selector"] for c in t["columns"]}
+    referenced = {o["matcher"]["options"] for o in p["fieldConfig"]["overrides"]}
+    assert referenced <= declared

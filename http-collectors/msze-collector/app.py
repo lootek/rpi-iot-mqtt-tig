@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """msze-collector HTTP API for the Grafana Infinity datasource.
 
-GET /upcoming?hours=3  rows for Masses starting within the window (1..12 h, default 3)
+GET /upcoming[?hours=N]  rows for Masses starting within the window (1..24 h; default
+                         from MSZE_WINDOW_HOURS, 6 when unset or invalid)
 GET /health            heartbeat, per-source cache ages/errors, churches with unconfirmed ETA
 
 Every request reloads the JSON cache from disk (the nightly job replaces it atomically)
@@ -26,17 +27,30 @@ from store import Store
 log = logging.getLogger("msze.app")
 
 WARSAW = ZoneInfo("Europe/Warsaw")
-DEFAULT_HOURS, MIN_HOURS, MAX_HOURS = 3, 1, 12
+DEFAULT_HOURS, MIN_HOURS, MAX_HOURS = 6, 1, 24
 JSON_TYPE = "application/json; charset=utf-8"
 
 
-def parse_hours(query: str) -> int:
+def _clamp(hours: int) -> int:
+    return max(MIN_HOURS, min(MAX_HOURS, hours))
+
+
+def default_hours(env=os.environ) -> int:
+    """Look-ahead window from MSZE_WINDOW_HOURS; garbage, zero or negative -> DEFAULT_HOURS."""
+    try:
+        hours = int(env.get("MSZE_WINDOW_HOURS", "").strip())
+    except ValueError:
+        return DEFAULT_HOURS
+    return _clamp(hours) if hours > 0 else DEFAULT_HOURS
+
+
+def parse_hours(query: str, default: int = DEFAULT_HOURS) -> int:
     raw = (parse_qs(query).get("hours") or [""])[0].strip()
     try:
         hours = int(raw)
     except ValueError:
-        return DEFAULT_HOURS
-    return max(MIN_HOURS, min(MAX_HOURS, hours))
+        return default
+    return _clamp(hours)
 
 
 def _days(fetched_at: str | None, now: datetime) -> float | None:
@@ -67,6 +81,7 @@ def health(now: datetime, churches: list[Church], cache: dict) -> dict:
 def make_server(port: int, store: Store, churches: list[Church], now_fn=None,
                 host: str = "") -> ThreadingHTTPServer:
     now_fn = now_fn or (lambda: datetime.now(WARSAW))
+    window = default_hours()
 
     class Handler(BaseHTTPRequestHandler):
         def _send(self, status: int, payload) -> None:
@@ -82,7 +97,7 @@ def make_server(port: int, store: Store, churches: list[Church], now_fn=None,
             url = urlsplit(self.path)
             try:
                 if url.path == "/upcoming":
-                    now, hours = now_fn(), parse_hours(url.query)
+                    now, hours = now_fn(), parse_hours(url.query, window)
                     rows = build_rows(now, churches, store.load(), hours)
                     self._send(200, {"generated_at": now.isoformat(), "window_hours": hours,
                                      "rows": rows})

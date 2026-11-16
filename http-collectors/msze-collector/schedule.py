@@ -134,7 +134,7 @@ def _no_data(c: Church, age_days: int | None) -> dict:
             "changed": False, "note": ""}
 
 
-def build_rows(now: datetime, churches: list[Church], cache: dict, hours: int = 3) -> list[dict]:
+def build_rows(now: datetime, churches: list[Church], cache: dict, hours: int = 6) -> list[dict]:
     if now.tzinfo is None:
         raise ValueError("now must be timezone-aware")
     now = now.astimezone(WARSAW)

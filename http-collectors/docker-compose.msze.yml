@@ -25,6 +25,8 @@ services:
       - PORT=8091
       - DATA_DIR=/data
       - MSZE_SCHEDULER=1
+      # look-ahead window shown on the dashboard, hours (1..24)
+      - MSZE_WINDOW_HOURS=6
 
 volumes:
   msze-data:
