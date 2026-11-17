@@ -176,18 +176,49 @@ def test_hours_param_overrides_env(serve, monkeypatch):
     assert s.json("/upcoming?hours=abc")[0]["window_hours"] == 12  # garbage param -> env default
 
 
-def test_upcoming_empty_window_returns_empty_rows_with_200(serve):
+EMPTY_ROW = {"start": None, "start_hm": "", "mode": "", "eta": "", "eta_min": None,
+             "eta_max": None, "leave_in_min": None, "status": "empty", "badges": "",
+             "data_age_days": None, "changed": False, "note": ""}
+
+
+def test_upcoming_empty_window_returns_explicit_row(serve):
     late = datetime(2026, 11, 12, 23, 0, tzinfo=WARSAW)
     s = serve(now=late, churches=(ALPHA, BETA))
     status, headers, raw = s.get("/upcoming")
     assert status == 200
-    assert json.loads(raw) == {"generated_at": late.isoformat(), "window_hours": 6, "rows": []}
+    assert json.loads(raw) == {
+        "generated_at": late.isoformat(), "window_hours": 6,
+        "rows": [{**EMPTY_ROW, "church": "Brak Mszy św. w najbliższych 6 h"}]}
+    body, _ = s.json("/upcoming?hours=3")
+    assert body["rows"][0]["church"] == "Brak Mszy św. w najbliższych 3 h"
+    assert body["rows"][0]["status"] == "empty"
+
+
+def test_upcoming_with_masses_has_no_empty_row(serve):
+    body, _ = serve().json("/upcoming")
+    assert "empty" not in [r["status"] for r in body["rows"]]
+    late_only = serve(cache=WINDOW_CACHE, churches=(ALPHA,), now=NOW).json("/upcoming?hours=1")[0]
+    assert [r["status"] for r in late_only["rows"]] == ["empty"]  # 22:00 is out of a 1 h window
+    body, _ = serve().json("/upcoming?hours=3")
+    assert {r["status"] for r in body["rows"]} <= {"ok", "late", "no_data"}
+
+
+def test_upcoming_only_no_data_rows_still_gets_empty_row(serve):
+    late = datetime(2026, 11, 12, 23, 0, tzinfo=WARSAW)
+    body, _ = serve(now=late).json("/upcoming?hours=2")  # GAMMA has no cache entry
+    assert [r["status"] for r in body["rows"]] == ["empty", "no_data"]
+    assert body["rows"][0]["church"] == "Brak Mszy św. w najbliższych 2 h"
+
+
+def test_upcoming_without_any_cache_is_empty_row_plus_no_data(serve):
+    body, _ = serve(cache=None).json("/upcoming")
+    assert [r["status"] for r in body["rows"]] == ["empty"] + ["no_data"] * 3
 
 
 def test_upcoming_without_cache_is_200_with_no_data_rows(serve):
     s = serve(cache=None)
     body, _ = s.json("/upcoming")
-    assert [r["status"] for r in body["rows"]] == ["no_data"] * 3
+    assert [r["status"] for r in body["rows"]] == ["empty"] + ["no_data"] * 3
 
 
 def test_upcoming_reloads_cache_from_disk_per_request(serve):

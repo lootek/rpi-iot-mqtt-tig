@@ -53,6 +53,17 @@ def parse_hours(query: str, default: int = DEFAULT_HOURS) -> int:
     return _clamp(hours)
 
 
+def _with_empty_row(rows: list[dict], hours: int) -> list[dict]:
+    """Prepend an informational row when no Mass falls in the window (Grafana would
+    otherwise show a generic "No data"; no_data rows alone do not count as a Mass)."""
+    if any(r["status"] in ("ok", "late") for r in rows):
+        return rows
+    return [{"start": None, "start_hm": "", "church": f"Brak Mszy św. w najbliższych {hours} h",
+             "mode": "", "eta": "", "eta_min": None, "eta_max": None, "leave_in_min": None,
+             "status": "empty", "badges": "", "data_age_days": None, "changed": False,
+             "note": ""}] + rows
+
+
 def _days(fetched_at: str | None, now: datetime) -> float | None:
     age = _age(fetched_at, now)
     return None if age is None else round(age.total_seconds() / 86400, 2)
@@ -98,7 +109,7 @@ def make_server(port: int, store: Store, churches: list[Church], now_fn=None,
             try:
                 if url.path == "/upcoming":
                     now, hours = now_fn(), parse_hours(url.query, window)
-                    rows = build_rows(now, churches, store.load(), hours)
+                    rows = _with_empty_row(build_rows(now, churches, store.load(), hours), hours)
                     self._send(200, {"generated_at": now.isoformat(), "window_hours": hours,
                                      "rows": rows})
                 elif url.path == "/health":

@@ -24,7 +24,6 @@ def test_dashboard_json_shape():
     assert p["type"] == "table"
     assert p["gridPos"]["w"] == 24
     assert p["datasource"]["uid"] == "msze-infinity"
-    assert p["fieldConfig"]["defaults"]["noValue"] == "Brak Mszy św. w wybranym oknie"
     assert p["options"].get("sortBy") in (None, [])  # keep API order
     assert p["options"].get("enablePagination") is False
     (t,) = p["targets"]
@@ -81,8 +80,50 @@ def test_dashboard_has_hours_variable_default_6():
     (t,) = p["targets"]
     assert t["url"].startswith("http://127.0.0.1:8091/")  # allow-list prefix
     assert "hours=${hours}" in t["url"]
-    assert "3 h" not in p["fieldConfig"]["defaults"]["noValue"]
-    assert "${" not in p["fieldConfig"]["defaults"]["noValue"]
     declared = {c["selector"] for c in t["columns"]}
     referenced = {o["matcher"]["options"] for o in p["fieldConfig"]["overrides"]}
     assert referenced <= declared
+
+
+def test_no_noValue_on_table_defaults():
+    # noValue is applied to every empty cell (e.g. blank badges), not only to empty tables
+    p = _panel()
+    assert "noValue" not in p["fieldConfig"]["defaults"]
+    for o in p["fieldConfig"]["overrides"]:
+        assert all(x["id"] != "noValue" for x in o["properties"])
+
+
+def test_status_column_excluded_by_transformation():
+    p = _panel()
+    organize = [t for t in p["transformations"] if t["id"] == "organize"]
+    assert len(organize) == 1
+    assert organize[0]["options"]["excludeByName"]["status"] is True
+    # custom.hideFrom.viz does not hide table columns in Grafana 11.5
+    assert "custom.hideFrom" not in json.dumps(p["fieldConfig"])
+    # nothing may depend on the (hidden) status column being displayed
+    assert "status" not in {o["matcher"]["options"] for o in p["fieldConfig"]["overrides"]}
+
+
+def test_late_rendering_driven_by_leave_in_min_mapping():
+    raw = open(os.path.join(HERE, "dashboard.json"), encoding="utf-8").read()
+    assert "nie zdążysz" in raw and "spóźniona" not in raw
+    (o,) = [o for o in _panel()["fieldConfig"]["overrides"]
+            if o["matcher"]["options"] == "leave_in_min"]
+    (m,) = [x["value"] for x in o["properties"] if x["id"] == "mappings"]
+    texts = {x["type"]: x["options"] for x in m}
+    assert texts["range"]["result"]["text"] == "nie zdążysz"
+    assert texts["range"]["result"]["color"] == "gray"
+    assert texts["special"]["match"] == "null"  # empty-window row has leave_in_min null
+
+
+def test_mode_mapping_leaves_empty_mode_blank():
+    (o,) = [o for o in _panel()["fieldConfig"]["overrides"]
+            if o["matcher"]["options"] == "mode"]
+    (m,) = [x["value"] for x in o["properties"] if x["id"] == "mappings"]
+    assert set(m[0]["options"]) == {"car", "walk"}  # "" matches nothing -> renders blank
+
+
+def test_timepicker_hidden():
+    d = _dashboard()
+    assert d["timepicker"]["hidden"] is True
+    assert d["refresh"] == "1m"

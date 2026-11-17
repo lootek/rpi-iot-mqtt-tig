@@ -17,9 +17,11 @@ curl 127.0.0.1:8091/health               # heartbeat, cache ages, config gaps
 clamped to 1..24; when absent or garbage it falls back to `MSZE_WINDOW_HOURS`
 (default 6). Rows are sorted by start time (ties
 by `eta_max`) with `no_data` rows ("brak danych") for churches without a usable
-schedule at the end. An empty window is `rows: []` with HTTP 200. Row keys:
+schedule at the end. When no row is `ok`/`late`, an explicit first row with
+`status: "empty"` and `church: "Brak Mszy św. w najbliższych N h"` is prepended
+(HTTP 200). Row keys:
 `start, start_hm, church, mode, eta, eta_min, eta_max, leave_in_min, status
-(ok|late|no_data), badges, data_age_days, changed, note`.
+(ok|late|no_data|empty), badges, data_age_days, changed, note`.
 
 `/health` → `{"heartbeat", "heartbeat_age_h", "sources": {id: {"regular_age_days",
 "exceptions_age_days", "error"}}, "unconfirmed_eta": [church ids]}`. Always 200,
