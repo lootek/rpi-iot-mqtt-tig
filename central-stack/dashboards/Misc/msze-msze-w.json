@@ -39,7 +39,7 @@
             "inspect": false
           },
           "mappings": [],
-          "noValue": "Brak Mszy w najbliższych 3 h",
+          "noValue": "Brak Mszy św. w wybranym oknie",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -340,7 +340,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "http://127.0.0.1:8091/upcoming",
+          "url": "http://127.0.0.1:8091/upcoming?hours=${hours}",
           "url_options": {
             "data": "",
             "method": "GET",
@@ -348,7 +348,7 @@
           }
         }
       ],
-      "title": "Najbliższe Msze",
+      "title": "Najbliższe Msze św. (${hours} h)",
       "type": "table"
     }
   ],
@@ -359,7 +359,50 @@
     "msze"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "6",
+          "value": "6"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Okno (h)",
+        "multi": false,
+        "name": "hours",
+        "options": [
+          {
+            "selected": false,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": true,
+            "text": "6",
+            "value": "6"
+          },
+          {
+            "selected": false,
+            "text": "9",
+            "value": "9"
+          },
+          {
+            "selected": false,
+            "text": "12",
+            "value": "12"
+          },
+          {
+            "selected": false,
+            "text": "24",
+            "value": "24"
+          }
+        ],
+        "query": "3,6,9,12,24",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
   },
   "time": {
     "from": "now-15m",
@@ -369,6 +412,6 @@
   "timezone": "browser",
   "title": "Msze św.",
   "uid": "msze",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
