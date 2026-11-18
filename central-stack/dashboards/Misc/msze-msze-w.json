@@ -39,7 +39,6 @@
             "inspect": false
           },
           "mappings": [],
-          "noValue": "Brak Mszy św. w wybranym oknie",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -186,7 +185,7 @@
                       "result": {
                         "color": "gray",
                         "index": 0,
-                        "text": "spóźniona"
+                        "text": "nie zdążysz"
                       },
                       "to": -1
                     },
@@ -226,46 +225,6 @@
               {
                 "id": "displayName",
                 "value": "Uwagi"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "status"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Status"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "late": {
-                        "color": "gray",
-                        "index": 0,
-                        "text": "spóźniona"
-                      },
-                      "no_data": {
-                        "color": "gray",
-                        "index": 1,
-                        "text": "brak danych"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
               }
             ]
           }
@@ -349,6 +308,16 @@
         }
       ],
       "title": "Najbliższe Msze św. (${hours} h)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "status": true
+            }
+          }
+        }
+      ],
       "type": "table"
     }
   ],
@@ -408,10 +377,12 @@
     "from": "now-15m",
     "to": "now"
   },
-  "timepicker": {},
+  "timepicker": {
+    "hidden": true
+  },
   "timezone": "browser",
   "title": "Msze św.",
   "uid": "msze",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
