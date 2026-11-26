@@ -63,12 +63,13 @@ a degrading sensor still gets noticed without every glitch becoming an alert.
 ### MQTT / sensor-liveness (5m)
 | rule | fires when | for | severity |
 |---|---|---|---|
-| DHT22 sensor silent | any of the 14 stops publishing | 15m | critical |
+| DHT22 sensor silent | any of the 15 stops publishing | 15m | critical |
+| DHT22 sensor silent for a day or more | any of the 15 has no data since local midnight (30d daily buckets; catches sensors that dropped out of the 24h rule's window) | 15m | critical |
 | SCD30 CO2 sensor silent | dining_room or office stops | 15m | warning |
 | SPS30 particulate sensor silent | patio stops | 15m | warning |
 | MQTT pipeline down | *all* DHT22 data stops at once | 10m | critical |
 
-All 14 sensors share one path — ESP nodes → mosquitto → mqtt-to-influxdb →
+All 15 sensors share one path — ESP nodes → mosquitto → mqtt-to-influxdb →
 influxdb, every hop on lothlorien. *MQTT pipeline down* names that cause directly
 instead of leaving you to infer it from fourteen sensor alerts.
 
@@ -89,7 +90,7 @@ and the CO2-high rule silently stops protecting the room.
 ### MQTT / environment (5m)
 | rule | fires when | for | severity |
 |---|---|---|---|
-| Freeze risk | 15-min median < 3 °C at any station except outdoor backyard_shed/patio | 30m | warning |
+| Freeze risk | 15-min median < 3 °C at any station except outdoor backyard_shed/patio (13 of 15) | 30m | warning |
 | High humidity — mould risk | 12-hour mean > 75% RH indoors | 6h | info |
 | Room too cold (heating fault) | 15-min median < 16 °C indoors | 2h | warning |
 
@@ -160,8 +161,8 @@ deliberately excluded:
 ## Notification routing
 
 `group_by: [alertname, severity]` is the load-bearing setting. When the MQTT
-bridge dies, all 14 *DHT22 sensor silent* instances share an alertname and arrive
-as **one** notification listing every affected room, rather than 14 emails.
+bridge dies, all 15 *DHT22 sensor silent* instances share an alertname and arrive
+as **one** notification listing every affected room, rather than 15 emails.
 
 - default: `group_wait 1m`, `repeat_interval 12h`
 - `severity=critical`: `group_wait 10s`, `repeat_interval 4h`

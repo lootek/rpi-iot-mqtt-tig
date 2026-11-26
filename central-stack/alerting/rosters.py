@@ -7,12 +7,13 @@ Verified against live InfluxDB on lothlorien, 2026-08-29.
 """
 
 # --- DHT22 temperature/humidity sensors -------------------------------------
-# The 14 that are actually publishing. Confirmed live: every one of these had a
-# reading less than 40s old at the time of writing.
+# All 15 stations. 14 were confirmed live 2026-08-29; boiler_room (moria) is the
+# 15th, added 2026-11-26. It was silent at the time (last seen 2026-11-17), which
+# is exactly what the liveness rules are for.
 DHT22_ALL = [
     "attic", "backyard_shed", "basement", "bathroom_hex", "bathroom_tetris",
-    "bedroom", "dining_room", "garage", "guests", "kids_room_1", "kitchen",
-    "living_room", "office", "patio",
+    "bedroom", "boiler_room", "dining_room", "garage", "guests", "kids_room_1",
+    "kitchen", "living_room", "office", "patio",
 ]
 
 # Heated interior rooms. Comfort/mould/plausibility rules apply here only --
@@ -29,7 +30,7 @@ DHT22_UNHEATED = ["attic", "backyard_shed", "garage", "patio"]
 # excluded from the freeze-risk rule (it paged on them every cold night).
 DHT22_OUTDOOR = ["backyard_shed", "patio"]
 
-# Freeze-risk coverage: every station except the outdoor ones.
+# Freeze-risk coverage: every station except the outdoor ones (13 of 15).
 DHT22_FREEZE_RISK = [loc for loc in DHT22_ALL if loc not in DHT22_OUTDOOR]
 
 # --- other MQTT sensors -----------------------------------------------------

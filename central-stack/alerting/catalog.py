@@ -193,6 +193,22 @@ group(F_MQTT, "sensor-liveness", 5 * MIN, [
         unit_hint="Room: {{ $labels.location }}",
         dashboard=DASH_ROOM,
     ),
+    # Companion to the rule above. That one buckets 5m over 24h, so a sensor
+    # silent for more than a day drops out of the result entirely and can never
+    # fire (boiler_room had been dark 9 days when this was added). Daily buckets
+    # over 30d keep it present as zeros; today's bucket reading 0 means nothing
+    # has arrived since local midnight. Together the two rules leave no gap.
+    silence_rule(
+        "iot-dht22-silent-long", "DHT22 sensor silent for a day or more", F_MQTT,
+        "sensor-liveness", DS_MQTT,
+        f'SELECT count("temperature") FROM "dht22" WHERE $timeFilter '
+        f'AND "location" =~ /{rx(DHT22_ALL)}/ '
+        f"GROUP BY time(1d), \"location\" fill(0) tz('Europe/Warsaw')",
+        30 * 24 * HOUR, "15m", "critical",
+        what="DHT22 in {{ $labels.location }} (no data since local midnight)",
+        unit_hint="Room: {{ $labels.location }}",
+        dashboard=DASH_ROOM,
+    ),
     silence_rule(
         "iot-scd30-silent", "SCD30 CO2 sensor silent", F_MQTT, "sensor-liveness", DS_MQTT,
         f'SELECT count("co2") FROM "scd30" WHERE $timeFilter '
@@ -210,10 +226,10 @@ group(F_MQTT, "sensor-liveness", 5 * MIN, [
         what="SPS30 particulate sensor at {{ $labels.location }}",
         unit_hint="Location: {{ $labels.location }}",
     ),
-    # The backstop. All 14 DHT22s share one path: ESP nodes -> mosquitto ->
+    # The backstop. All 15 DHT22s share one path: ESP nodes -> mosquitto ->
     # mqtt-to-influxdb -> influxdb, every hop on lothlorien. A single failure
     # there silences everything, and this rule names that cause directly
-    # instead of leaving you to infer it from 14 sensor alerts.
+    # instead of leaving you to infer it from 15 sensor alerts.
     rule(
         "iot-pipeline-down", "MQTT pipeline down", F_MQTT, "sensor-liveness",
         [query("A", DS_MQTT,
@@ -224,7 +240,7 @@ group(F_MQTT, "sensor-liveness", 5 * MIN, [
         summary="MQTT pipeline down - no sensor data reaching InfluxDB at all",
         description=(
             "Zero DHT22 datapoints arrived in the last bucket, across every room.\n"
-            "All 14 sensors failing simultaneously is not plausible, so the fault is "
+            "All 15 sensors failing simultaneously is not plausible, so the fault is "
             "in the shared path rather than the devices.\n\n"
             "Check on lothlorien, in order:\n"
             "  docker ps | grep -E 'mosquitto|mqtt-to-influxdb|influxdb'\n"
@@ -884,8 +900,8 @@ group(F_MQTT, "ups-monitor", 1 * MIN, [
 RECEIVER = "Grafana alert"
 
 # group_by [alertname, severity] is the load-bearing part: when the MQTT bridge
-# dies, all 14 "DHT22 sensor silent" instances share an alertname and arrive as
-# ONE notification listing every affected room, instead of 14 separate emails.
+# dies, all 15 "DHT22 sensor silent" instances share an alertname and arrive as
+# ONE notification listing every affected room, instead of 15 separate emails.
 POLICY = {
     "receiver": RECEIVER,
     "group_by": ["alertname", "severity"],
