@@ -89,7 +89,7 @@ and the CO2-high rule silently stops protecting the room.
 ### MQTT / environment (5m)
 | rule | fires when | for | severity |
 |---|---|---|---|
-| Freeze risk | 15-min median < 3 °C in attic/shed/basement/garage/patio | 30m | warning |
+| Freeze risk | 15-min median < 3 °C at any station except outdoor backyard_shed/patio | 30m | warning |
 | High humidity — mould risk | 12-hour mean > 75% RH indoors | 6h | info |
 | Room too cold (heating fault) | 15-min median < 16 °C indoors | 2h | warning |
 

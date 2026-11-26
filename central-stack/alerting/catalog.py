@@ -336,7 +336,8 @@ group(F_MQTT, "environment", 5 * MIN, [
         description=(
             "Location:  {{ $labels.location }}\n"
             'Measured:  {{ printf "%.1f" $values.B.Value }} C (15-minute median)\n'
-            "Threshold: below 3 C sustained for 30m\n\n"
+            "Threshold: below 3 C sustained for 30m\n"
+            "Covers every station except the open-air backyard_shed and patio.\n\n"
             "Action: check pipes and anything stored that can freeze or burst."
         ),
         dashboard=DASH_ROOM,

@@ -25,8 +25,12 @@ DHT22_INDOOR = [
 # Unheated / outdoor-ish. Excluded from comfort rules.
 DHT22_UNHEATED = ["attic", "backyard_shed", "garage", "patio"]
 
-# Where a freeze actually costs money (pipes, stored liquids).
-DHT22_FREEZE_RISK = ["attic", "backyard_shed", "basement", "garage", "patio"]
+# Open-air sensors. They sit below freezing all winter by design, so they are
+# excluded from the freeze-risk rule (it paged on them every cold night).
+DHT22_OUTDOOR = ["backyard_shed", "patio"]
+
+# Freeze-risk coverage: every station except the outdoor ones.
+DHT22_FREEZE_RISK = [loc for loc in DHT22_ALL if loc not in DHT22_OUTDOOR]
 
 # --- other MQTT sensors -----------------------------------------------------
 SCD30_LOCATIONS = ["dining_room", "office"]     # CO2
